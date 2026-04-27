@@ -241,9 +241,9 @@ export default function Chapter1({ index }) {
 
                 <FadeIn delay={0.1}>
                     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 36, width: '100%' }}>
-                        <StatBox num="240.338" label="Total Pernikahan 2024" />
-                        <StatBox num="32,8" label="Rata-rata Usia Pria Menikah"    color={colors.gold} />
-                        <StatBox num="31,2" label="Rata-rata Usia Wanita Menikah"  color="#b07cc6" />
+                        <StatBox num="240,338" label="Total Pernikahan 2024" />
+                        <StatBox num="32.8" label="Rata-rata Usia Pria Menikah"    color={colors.gold} />
+                        <StatBox num="31.2" label="Rata-rata Usia Wanita Menikah"  color="#b07cc6" />
                     </div>
                 </FadeIn>
 
