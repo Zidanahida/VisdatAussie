@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Map STATE_NAME from GeoJSON to our data keys
+// Pemetaan Nama State dari GeoJSON ke Key Data
 const nameToKey = {
     'New South Wales':    'NSW',
     'Victoria':           'VIC',
@@ -12,8 +12,7 @@ const nameToKey = {
     'Australian Capital Territory': 'ACT',
 };
 
-// Project [lon, lat] → [x, y] using simple equirectangular within a viewBox
-function makeProjection(features, width, height, padding = 20) {
+function makeProjection(features, width, height, padding = 15) {
     let minLon = Infinity, maxLon = -Infinity;
     let minLat = Infinity, maxLat = -Infinity;
 
@@ -40,12 +39,11 @@ function makeProjection(features, width, height, padding = 20) {
     const scale  = Math.min(scaleX, scaleY);
 
     return ([lon, lat]) => [
-        padding + (lon - minLon) * scale,
-        height - padding - (lat - minLat) * scale,   // flip Y (lat increases upward)
+        padding + (lon - minLon) * scale + (width - padding * 2 - (maxLon - minLon) * scale) / 2,
+        height - padding - (lat - minLat) * scale - (height - padding * 2 - (maxLat - minLat) * scale) / 2,
     ];
-};
+}
 
-// Convert a ring of coordinates to an SVG path string
 function ringToPath(ring, project) {
     return ring.map((coord, i) => {
         const [x, y] = project(coord);
@@ -53,188 +51,134 @@ function ringToPath(ring, project) {
     }).join(' ') + ' Z';
 }
 
-// Build full SVG path string for a feature (Polygon or MultiPolygon)
 function featureToPath(feature, project) {
     const geom = feature.geometry;
     const parts = [];
-
     if (geom.type === 'Polygon') {
         geom.coordinates.forEach(ring => parts.push(ringToPath(ring, project)));
     } else if (geom.type === 'MultiPolygon') {
-        geom.coordinates.forEach(polygon =>
-            polygon.forEach(ring => parts.push(ringToPath(ring, project)))
-        );
+        geom.coordinates.forEach(polygon => polygon.forEach(ring => parts.push(ringToPath(ring, project))));
     }
     return parts.join(' ');
 }
 
-// Compute true polygon centroid using the shoelace / area-weighted formula
 function ringCentroid(ring, project) {
     let area = 0, cx = 0, cy = 0;
     const pts = ring.map(project);
-    const n = pts.length;
-    for (let i = 0, j = n - 1; i < n; j = i++) {
-        const cross = pts[j][0] * pts[i][1] - pts[i][0] * pts[j][1];
+    for (let i = 0, n = pts.length; i < n; i++) {
+        const j = (i + 1) % n;
+        const cross = pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
         area += cross;
-        cx   += (pts[j][0] + pts[i][0]) * cross;
-        cy   += (pts[j][1] + pts[i][1]) * cross;
+        cx += (pts[i][0] + pts[j][0]) * cross;
+        cy += (pts[i][1] + pts[j][1]) * cross;
     }
     area /= 2;
-    if (Math.abs(area) < 1e-10) {
-        // degenerate — fall back to mean
-        const mx = pts.reduce((s, p) => s + p[0], 0) / n;
-        const my = pts.reduce((s, p) => s + p[1], 0) / n;
-        return { cx: mx, cy: my, area: 0 };
-    }
-    return { cx: cx / (6 * area), cy: cy / (6 * area), area: Math.abs(area) };
+    return area === 0 ? [0, 0] : [cx / (6 * area), cy / (6 * area)];
 }
 
 function getCentroid(feature, project) {
     const geom = feature.geometry;
-    let polygons = [];
-
-    if (geom.type === 'Polygon') {
-        polygons = [geom.coordinates];
-    } else if (geom.type === 'MultiPolygon') {
-        polygons = geom.coordinates;
-    }
-
-    // Pick the polygon with the largest projected area
-    let bestCx = 0, bestCy = 0, bestArea = -1;
-    polygons.forEach(poly => {
-        const outer = poly[0];
-        if (!outer || outer.length < 3) return;
-        const { cx, cy, area } = ringCentroid(outer, project);
-        if (area > bestArea) { bestArea = area; bestCx = cx; bestCy = cy; }
+    const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+    let best = [0, 0], maxArea = -1;
+    polys.forEach(p => {
+        const center = ringCentroid(p[0], project);
+        if (p[0].length > maxArea) { best = center; maxArea = p[0].length; }
     });
-    return [bestCx, bestCy];
+    return best;
 }
 
-const W = 600, H = 700;
+const W = 600, H = 500;
 
-export default function AustraliaMap({ data, colorScale, unit = '%', title }) {
-    const [geo, setGeo]       = useState(null);
+export default function AustraliaMap({ data, colorScale, unit = '', title }) {
+    const [geo, setGeo] = useState(null);
     const [hovered, setHovered] = useState(null);
-    const [mouse, setMouse]   = useState({ x: 0, y: 0 });
+    const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
-        fetch('/australian-states.min.geojson')
-            .then(r => r.json())
-            .then(setGeo)
-            .catch(console.error);
+        fetch('/australian-states.min.geojson').then(r => r.json()).then(setGeo);
     }, []);
 
-    if (!geo) return (
-        <div style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>Memuat peta…</div>
-    );
+    if (!geo) return <div style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>Memuat peta…</div>;
 
     const project = makeProjection(geo.features, W, H);
 
     return (
-        <div style={{ width: '100%', maxWidth: 480 }}>
+        <div style={{ width: '100%', maxWidth: '550px', margin: '0 auto', position: 'relative' }}>
             {title && (
-                <h3 style={{
-                    fontFamily: "'Playfair Display', serif", fontSize: '1rem',
-                    color: '#3d2b2b', marginBottom: 12, textAlign: 'center',
-                }}>{title}</h3>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: '#3d2b2b', marginBottom: 12, textAlign: 'center' }}>
+                    {title}
+                </h3>
             )}
 
-            <svg
-                viewBox={`0 0 ${W} ${H}`}
-                style={{ width: '100%', filter: 'drop-shadow(0 6px 24px rgba(0,0,0,0.13))' }}
+            <svg 
+                viewBox={`0 0 ${W} ${H}`} 
+                style={{ width: '100%', height: 'auto', overflow: 'visible' }} 
                 onMouseLeave={() => setHovered(null)}
             >
                 {geo.features.map((feature) => {
-                    const stateName = feature.properties.STATE_NAME;
-                    const key  = nameToKey[stateName];
-                    const val  = key !== undefined ? data[key] : undefined;
-                    const fill = val !== undefined ? colorScale(val) : '#ccc';
+                    const stateFullName = feature.properties.STATE_NAME;
+                    const key = nameToKey[stateFullName];
+                    const val = data[key];
+                    const fill = val !== undefined ? colorScale(val) : '#f0f0f0';
                     const isHov = hovered === key;
-                    const d = featureToPath(feature, project);
                     const [cx, cy] = getCentroid(feature, project);
 
                     return (
-                        <g key={feature.id}>
+                        <g 
+                            key={feature.id} 
+                            onMouseMove={e => {
+                                const rect = e.currentTarget.closest('svg').getBoundingClientRect();
+                                setMouse({ 
+                                    x: (e.clientX - rect.left) / rect.width * W, 
+                                    y: (e.clientY - rect.top) / rect.height * H 
+                                });
+                                setHovered(key);
+                            }}
+                        >
                             <path
-                                d={d}
+                                d={featureToPath(feature, project)}
                                 fill={fill}
                                 stroke="white"
-                                strokeWidth={isHov ? 2 : 0.8}
-                                strokeLinejoin="round"
-                                style={{
-                                    cursor: 'pointer',
-                                    filter: isHov
-                                        ? 'brightness(0.78) drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
-                                        : 'brightness(1)',
-                                    transition: 'filter 0.18s',
-                                }}
-                                onMouseMove={e => {
-                                    const rect = e.currentTarget.closest('svg').getBoundingClientRect();
-                                    setMouse({
-                                        x: (e.clientX - rect.left) / rect.width  * W,
-                                        y: (e.clientY - rect.top)  / rect.height * H,
-                                    });
-                                    setHovered(key);
-                                }}
+                                strokeWidth={isHov ? 1.5 : 0.5}
+                                style={{ transition: 'all 0.2s', cursor: 'pointer', filter: isHov ? 'brightness(0.9) drop-shadow(0 4px 8px rgba(0,0,0,0.2))' : 'none' }}
                             />
-                            {/* Label — skip tiny/undefined regions */}
                             {key && val !== undefined && (
-                                <>
-                                    <text x={cx} y={cy - 6} textAnchor="middle"
-                                        style={{
-                                            fontSize: key === 'ACT' ? '8px' : key === 'TAS' ? '11px' : '13px',
-                                            fontWeight: 700, fill: 'white', pointerEvents: 'none',
-                                            paintOrder: 'stroke', stroke: 'rgba(0,0,0,0.4)', strokeWidth: '3px',
+                                <g style={{ pointerEvents: 'none' }}>
+                                    <text x={cx} y={cy - 4} textAnchor="middle" 
+                                        style={{ 
+                                            fontSize: '12px', fontWeight: 800, fill: 'white', 
+                                            paintOrder: 'stroke', stroke: 'black', strokeWidth: 2.5 
                                         }}>
                                         {key}
                                     </text>
-                                    <text x={cx} y={cy + 10} textAnchor="middle"
-                                        style={{
-                                            fontSize: key === 'ACT' ? '7px' : key === 'TAS' ? '10px' : '12px',
-                                            fill: 'rgba(255,255,255,0.95)', pointerEvents: 'none',
-                                            paintOrder: 'stroke', stroke: 'rgba(0,0,0,0.3)', strokeWidth: '2.5px',
+                                    <text x={cx} y={cy + 10} textAnchor="middle" 
+                                        style={{ 
+                                            fontSize: '10px', fontWeight: 700, fill: 'white', 
+                                            paintOrder: 'stroke', stroke: 'black', strokeWidth: 2 
                                         }}>
-                                        {val}{unit}
+                                        {val.toLocaleString()}{unit}
                                     </text>
-                                </>
+                                </g>
                             )}
                         </g>
                     );
                 })}
 
-                {/* Tooltip */}
-                {hovered && data[hovered] !== undefined && (() => {
-                    const tx = Math.min(Math.max(mouse.x, 100), W - 100);
-                    const ty = Math.max(mouse.y - 20, 60);
-                    const label = Object.entries(nameToKey).find(([, v]) => v === hovered)?.[0] || hovered;
-                    return (
-                        <g style={{ pointerEvents: 'none' }}>
-                            <rect x={tx - 95} y={ty - 50} width={190} height={52}
-                                rx={10} fill="rgba(20,10,10,0.88)" />
-                            <text x={tx} y={ty - 28} textAnchor="middle"
-                                style={{ fontSize: '12px', fill: '#f2c4ce', fontWeight: 700 }}>
-                                {label}
-                            </text>
-                            <text x={tx} y={ty - 10} textAnchor="middle"
-                                style={{ fontSize: '14px', fill: 'white', fontWeight: 600 }}>
-                                {data[hovered]}{unit}
-                            </text>
-                        </g>
-                    );
-                })()}
+                {/* Tooltip Dinamis saat Hover */}
+                {hovered && data[hovered] !== undefined && (
+                    <g style={{ pointerEvents: 'none' }}>
+                        <rect 
+                            x={mouse.x + 12} y={mouse.y - 45} 
+                            width={140} height={40} rx={8} 
+                            fill="rgba(61,43,43,0.92)" 
+                        />
+                        <text x={mouse.x + 82} y={mouse.y - 20} textAnchor="middle" 
+                            style={{ fontSize: '11px', fill: 'white', fontWeight: 600 }}>
+                            {hovered}: {data[hovered].toLocaleString()}{unit}
+                        </text>
+                    </g>
+                )}
             </svg>
-
-            {/* Legend */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-                {Object.entries(data)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([key, val]) => (
-                        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#666' }}>
-                            <div style={{ width: 11, height: 11, borderRadius: 3, background: colorScale(val), flexShrink: 0 }} />
-                            <span>{key}: {val}{unit}</span>
-                        </div>
-                    ))}
-            </div>
         </div>
     );
 }
