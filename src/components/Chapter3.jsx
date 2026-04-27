@@ -1,15 +1,9 @@
-import React from 'react';
-import { Pie, Bar } from 'react-chartjs-2';
+import React, { useRef, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { Section, Divider, ChapterLabel, ChartCard, FadeIn, colors } from './shared';
 import AustraliaMap from './AustraliaMap';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-
-<script
-    type="module"
-    src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js">
-</script>
 
 const defactoData = { NSW: 13.2, VIC: 14.1, QLD: 15.8, SA: 13.9, WA: 15.2, TAS: 16.4, NT: 20.1, ACT: 14.7 };
 
@@ -33,24 +27,20 @@ const defactoColorScale = (val) => {
     }
 };
 
-const pieData = {
-    labels: ['Pasangan Menikah (Registered)', 'Pasangan De Facto'],
-    datasets: [{
-        data: [7_025_000, 1_017_000],
-        backgroundColor: ['rgba(212,120,138,0.85)', 'rgba(201,168,76,0.8)'],
-        borderColor: ['#d4788a', '#c9a84c'],
-        borderWidth: 2,
-        hoverOffset: 14,
-    }],
-};
-
-const pieOptions = {
-    responsive: true,
-    plugins: {
-        legend: { position: 'bottom' },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} pasangan` } },
-    },
-};
+function TableauViz() {
+    const ref = useRef(null);
+    useEffect(() => {
+        if (!ref.current || ref.current.children.length > 0) return;
+        const viz = document.createElement('tableau-viz');
+        viz.setAttribute('src', 'https://public.tableau.com/views/TBDkelompok2-Chapter3/Dashboard1');
+        viz.setAttribute('width', '100%');
+        viz.setAttribute('height', '500');
+        viz.setAttribute('toolbar', 'hidden');
+        viz.setAttribute('hide-tabs', '');
+        ref.current.appendChild(viz);
+    }, []);
+    return <div ref={ref} style={{ width: '100%', minHeight: 500 }} />;
+}
 
 function BgDecor() {
     return (
@@ -116,18 +106,10 @@ export default function Chapter3({ index }) {
 
                 <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', justifyContent: 'center', width: '100%', maxWidth: 1100, boxSizing: 'border-box' }}>
                     <FadeIn delay={0.1}>
-    <ChartCard title="Komposisi Pasangan: Registered vs De Facto (SP 2021)">
-        <div style={{ width: '100%', minHeight: 500 }}>
-            <tableau-viz
-                src="https://public.tableau.com/views/TBDkelompok2-Chapter3/Dashboard1"
-                width="100%"
-                height="500"
-                toolbar="hidden"
-                hide-tabs
-            />
-        </div>
-    </ChartCard>
-</FadeIn>
+                        <ChartCard title="Komposisi Pasangan: Registered vs De Facto (SP 2021)">
+                            <TableauViz />
+                        </ChartCard>
+                    </FadeIn>
 
                     <FadeIn delay={0.2}>
                         <ChartCard title="Peta De Facto per Wilayah — Hover untuk detail">
