@@ -252,7 +252,7 @@ export default function Chapter1({ index }) {
                         <div style={{
                             background: 'white', borderRadius: 20, padding: 'clamp(16px,3vw,24px)',
                             boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-                            width: '100%', boxSizing: 'border-box',
+                            width: '70vw', boxSizwing: 'border-box',
                         }}>
                             <PopulationPyramid
                                 ageLabels={ageLabels}
