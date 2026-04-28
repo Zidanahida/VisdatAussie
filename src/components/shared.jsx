@@ -8,6 +8,8 @@ export const colors = {
     sage: '#a8b89a',
     dark: '#3d2b2b',
     soft: '#f9f0f3',
+    blue: '#8bb7c7',
+    orange: '#f2a365',
 };
 
 export function Section({ index, bg, children, style = {} }) {
@@ -23,7 +25,7 @@ export function Section({ index, bg, children, style = {} }) {
                 padding: 'clamp(32px, 6vw, 60px) clamp(16px, 4vw, 40px)',
                 background: bg,
                 position: 'relative',
-                overflow: 'visible',
+                overflow: 'hidden',   /* was 'visible' — caused horizontal scroll */
                 scrollSnapAlign: 'start',
                 boxSizing: 'border-box',
                 width: '100%',
