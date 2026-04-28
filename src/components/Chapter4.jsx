@@ -259,36 +259,6 @@ function SameSexIllustration() {
     );
 }
 
-function GenderMarriageViz() {
-    return (
-        <div style={{
-            background: 'white', borderRadius: 20, padding: '24px 32px',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-            maxWidth: 600, width: '100%', boxSizing: 'border-box', textAlign: 'center',
-        }}>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: '#3d2b2b', marginBottom: 6 }}>
-                Proporsi yang Sudah Menikah dalam Pasangan Same-Sex
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: '#9a7a9a', marginBottom: 20, lineHeight: 1.6 }}>
-                Dari 100 pasangan same-sex, berapa yang sudah menikah?
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 40 }}>
-                <div>
-                    <div style={{ fontSize: '3rem', fontFamily: "'Playfair Display', serif", color: '#6495ed', fontWeight: 700, lineHeight: 1 }}>27.7%</div>
-                    <div style={{ fontSize: '0.82rem', color: '#6495ed', fontWeight: 600, marginTop: 6 }}>♂ Male Same-Sex</div>
-                    <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: 4 }}>sudah menikah</div>
-                </div>
-                <div style={{ width: 1, background: '#f0f0f0' }} />
-                <div>
-                    <div style={{ fontSize: '3rem', fontFamily: "'Playfair Display', serif", color: '#d4788a', fontWeight: 700, lineHeight: 1 }}>32.2%</div>
-                    <div style={{ fontSize: '0.82rem', color: '#d4788a', fontWeight: 600, marginTop: 6 }}>♀ Female Same-Sex</div>
-                    <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: 4 }}>sudah menikah</div>
-                </div>
-            </div>
-            <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: 20 }}>Sumber: ABS Census 2021</p>
-        </div>
-    );
-}
 
 export default function Chapter4({ index }) {
     const data4 = useData4();
@@ -325,9 +295,6 @@ export default function Chapter4({ index }) {
                             <SameSexIllustration />
                         </FadeIn>
 
-                        <FadeIn delay={0.3}>
-                            <GenderMarriageViz />
-                        </FadeIn>
                     </div>
                 )}
             </div>
