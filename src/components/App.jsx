@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Hero from './Hero';
 import Intro from './Intro';
 import Chapter1 from './Chapter1';
 import Chapter2 from './Chapter2';
@@ -7,10 +8,8 @@ import Chapter4 from './Chapter4';
 import Conclusion from './Conclusion';
 import Footer from './Footer';
 
-
 export default function App() {
     const [activeSection, setActiveSection] = useState(0);
-
 
     useEffect(() => {
         const sections = document.querySelectorAll('section[data-index]');
@@ -33,13 +32,11 @@ export default function App() {
 
         sections.forEach(s => observer.observe(s));
 
-        // ✅ Fallback: deteksi saat scroll sudah sampai paling bawah
         const handleScroll = () => {
             const scrollBottom = window.innerHeight + window.scrollY;
             const pageHeight = document.documentElement.scrollHeight;
 
             if (scrollBottom >= pageHeight - 80) {
-                // Ambil index tertinggi dari semua section yang ada
                 const allIndexes = Array.from(sections).map(s => Number(s.dataset.index));
                 const maxIndex = Math.max(...allIndexes);
                 setActiveSection(maxIndex);
@@ -54,7 +51,6 @@ export default function App() {
         };
     }, []);
 
-
     const labels = ['Intro', 'Ch.1', 'Ch.2', 'Ch.3', 'Ch.4', 'Akhir'];
 
     const navLabels = [
@@ -67,18 +63,17 @@ export default function App() {
     ];
 
     const accentColors = [
-        '#d4788a',
-        '#df9daa',
-        '#4a9d5c',
+        '#d4788a',        
         'rgb(255, 209, 247)',
+        '#4a9d5c',
         '#b483ff',
         '#c9a84c',
+        '#d4788a',
     ];
 
     const scrollTo = (i) => {
         document.querySelector(`section[data-index="${i}"]`)?.scrollIntoView({ behavior: 'smooth' });
     };
-
 
     return (
         <>
@@ -109,7 +104,7 @@ export default function App() {
                             style={{
                                 background: isActive ? accentColors[i] : 'transparent',
                                 border: `1.5px solid ${isActive ? accentColors[i] : 'transparent'}`,
-                                color: isActive ? '#fff' : '#7a5c5c',
+                                color: isActive ? (i === 2 ? '#3d2b2b' : '#fff') : '#7a5c5c',
                                 padding: '4px 12px',
                                 borderRadius: 16,
                                 cursor: 'pointer',
@@ -141,9 +136,15 @@ export default function App() {
 
             {/* DOT NAVIGATION */}
             <nav style={{
-                position: 'fixed', right: 20, top: '50%', transform: 'translateY(-50%)',
+                position: 'fixed',
+                right: 20,
+                top: '50%',
+                transform: 'translateY(-50%)',
                 zIndex: 1000,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 12,
             }}>
                 {labels.map((lbl, i) => {
                     const isActive = activeSection === i;
@@ -174,6 +175,7 @@ export default function App() {
                 color: '#3d2b2b',
                 overflowX: 'hidden',
             }}>
+                <Hero index={0} />
                 <Intro index={0} />
                 <Chapter1 index={1} />
                 <Chapter2 index={2} />

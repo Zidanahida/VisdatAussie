@@ -399,7 +399,7 @@ export default function Chapter1({ index }) {
                 <FadeIn>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'flex-start' }}>
                         <div style={{ flex: '1 1 340px' }}>
-                            <ChapterLabel num={1} title="💒 Total Pernikahan & Usia Menikah" />
+                            <ChapterLabel num={1}/>
                             <Divider style={{ margin: '0 0 24px 0' }} />
                             <h3 style={{ ...storyTitleStyle, textAlign: 'center' }}>Di usia berapa orang Australia memilih untuk menikah?</h3>
                             <p style={{ ...storyTextStyle, marginTop: 16, textAlign: 'center' }}>
@@ -478,7 +478,7 @@ export default function Chapter1({ index }) {
                             </div>
                             <h3 style={storyTitleStyle}>Puncak yang Tak Terduga</h3>
                             <p style={{ ...storyTextStyle, marginTop: 12 }}>
-                                Bar chart ini mempertegas narasi piramida — kelompok usia <span style={highlightText}>30–34 tahun</span> mencatat jumlah pernikahan tertinggi secara absolut. Ini bukan kebetulan, melainkan cerminan dari generasi yang tumbuh dengan ekspektasi lebih tinggi terhadap kesiapan finansial dan emosional.
+                                Bar chart ini mempertegas narasi piramida — kelompok usia <span style={highlightText}>30–34 tahun</span> mencatat jumlah pernikahan tertinggi secara absolut.
                             </p>
                             <p style={storyTextStyle}>
                                 Setelah puncak di usia 30-an, angka pernikahan menurun secara bertahap. Namun pernikahan di usia <span style={{ color: colors.gold, fontWeight: 600 }}>40 tahun ke atas</span> tetap signifikan, menunjukkan bahwa cinta tidak mengenal batas usia di Australia.

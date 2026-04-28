@@ -87,20 +87,6 @@ export default function Conclusion({ index }) {
 
                 <div style={{
                     opacity: containerVisible ? 1 : 0,
-                    transform: containerVisible ? 'translateY(0)' : 'translateY(24px)',
-                    transition: 'opacity 0.7s ease 0.05s, transform 0.7s ease 0.05s',
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: 'clamp(2rem, 5vw, 3.6rem)',
-                    color: colors.rose,
-                    lineHeight: 1.2,
-                    marginBottom: 12,
-                    fontStyle: 'italic',
-                }}>
-                    Masih Terus Berjalan
-                </div>
-
-                <div style={{
-                    opacity: containerVisible ? 1 : 0,
                     transition: 'opacity 0.6s ease 0.1s',
                     display: 'flex', alignItems: 'center', gap: 12,
                     marginBottom: 40,
