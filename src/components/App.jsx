@@ -63,9 +63,9 @@ export default function App() {
     ];
 
     const accentColors = [
-        '#d4788a',
-        '#4a9d5c',
+        '#d4788a',        
         'rgb(255, 209, 247)',
+        '#4a9d5c',
         '#b483ff',
         '#c9a84c',
         '#d4788a',
