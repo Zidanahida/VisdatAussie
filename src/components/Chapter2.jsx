@@ -113,7 +113,7 @@ function BgDecor() {
             {/* Corner bracket — top left */}
             <div style={{ position: 'absolute', top: 36, left: 36, pointerEvents: 'none' }}>
                 <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                    <path d="M2 62 L2 2 L62 2" stroke="rgba(74,157,92,0.38)" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M2 62 L2 2 L62 2" stroke="rgba(74,157,92,0.38)" strokeWidth="1.5" strokeLinecap="round" />
                     <circle cx="2" cy="2" r="3.5" fill="rgba(74,157,92,0.55)" />
                     <circle cx="62" cy="2" r="2" fill="rgba(74,157,92,0.25)" />
                 </svg>
@@ -121,14 +121,14 @@ function BgDecor() {
             {/* Corner bracket — bottom right */}
             <div style={{ position: 'absolute', bottom: 36, right: 36, pointerEvents: 'none', transform: 'rotate(180deg)' }}>
                 <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                    <path d="M2 62 L2 2 L62 2" stroke="rgba(74,157,92,0.38)" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M2 62 L2 2 L62 2" stroke="rgba(74,157,92,0.38)" strokeWidth="1.5" strokeLinecap="round" />
                     <circle cx="2" cy="2" r="3.5" fill="rgba(74,157,92,0.55)" />
                 </svg>
             </div>
             {/* Corner bracket — top right small */}
             <div style={{ position: 'absolute', top: 36, right: 36, pointerEvents: 'none' }}>
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <path d="M30 2 L30 30 L2 30" stroke="rgba(74,157,92,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M30 2 L30 30 L2 30" stroke="rgba(74,157,92,0.2)" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
             </div>
 
@@ -431,7 +431,7 @@ export default function Chapter2({ index }) {
                                         { color: colors.rose, label: 'Musim Semi (Sep - Nov)' },
                                         { color: colors.gold, label: 'Musim Gugur (Mar - Mei)' },
                                         { color: colors.orange, label: 'Musim Panas (Des - Feb)' },
-                                        { color: colors.blue, label: 'Musim Dingin (Jun - Aug)' },
+                                        { color: colors.blue, label: 'Musim Kering (Jun - Agu)' },
                                     ].map((item, i) => (
                                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: '#666' }}>
                                             <div style={{ width: 11, height: 11, background: item.color, borderRadius: 3, flexShrink: 0, boxShadow: `0 1px 4px ${item.color}66` }} />
@@ -448,7 +448,8 @@ export default function Chapter2({ index }) {
                                 Dominasi <span style={highlightText()}>New South Wales</span> memuncak di <span style={highlightText()}>Oktober</span> dengan 4.684 pernikahan. Menariknya, wilayah <span style={highlightText(colors.orange)}>Tasmania</span> menjadi anomali yang puncaknya justru terjadi di bulan <span style={highlightText(colors.orange)}>Februari</span>, memanfaatkan sisa kehangatan musim panas.
                             </p>
                             <p style={storyTextStyle}>
-                                Di sisi lain, ibu kota <span style={highlightText(colors.gold)}>ACT</span> dan <span style={highlightText(colors.gold)}>South Australia</span> lebih memilih pesona musim gugur di bulan <span style={highlightText(colors.gold)}>Maret</span>. Sementara di wilayah utara yang tropis seperti <span style={highlightText(colors.blue)}>Northern Territory</span>, pasangan justru memilih bulan <span style={highlightText(colors.blue)}>Agustus</span> saat cuaca cerah dan kering.
+                                Di sisi lain, ibu kota <span style={highlightText(colors.gold)}>ACT</span> dan <span style={highlightText(colors.gold)}>South Australia</span> lebih memilih pesona musim gugur di bulan <span style={highlightText(colors.gold)}>Maret</span>. Sementara di wilayah utara yang tropis seperti <span style={highlightText(colors.blue)}>Northern Territory</span>,
+                                pasangan justru memilih bulan <span style={highlightText(colors.blue)}>Agustus</span> di puncak musim kering — saat langit cerah dan kelembaban rendah menggantikan hujan deras musim basah.
                             </p>
                             <p style={{ ...storyTextStyle, fontStyle: 'italic', fontSize: '0.9rem', marginBottom: 0 }}>
                                 "Setiap wilayah memiliki iklimnya sendiri untuk merayakan cinta."
@@ -456,7 +457,6 @@ export default function Chapter2({ index }) {
                         </div>
                     </div>
                 </FadeIn>
-
             </div>
         </Section>
     );
