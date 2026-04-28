@@ -39,7 +39,7 @@ export default function Footer() {
                 position: 'relative',
                 zIndex: 1,
             }}>
-                💍 Love Down Under
+                Australia Marriage Data Story
             </h2>
 
             <p style={{

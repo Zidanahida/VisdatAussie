@@ -319,7 +319,7 @@ export default function Chapter2({ index }) {
                         <div style={{ flex: '1 1 340px' }}>
                             <ChapterLabel num={2} />
                             <Divider style={{ margin: '0 0 24px 0' }} />
-                            <h3 style={{ ...storyTitleStyle, textAlign: 'center' }}>Pernah kepo ga sih, kapan orang Aussie suka nikah</h3>
+                            <h3 style={{ ...storyTitleStyle, textAlign: 'center' }}>Pernah kepo ga sih, kapan orang Aussie melaksanakan pernikahan?</h3>
                             <p style={{ ...storyTextStyle, marginTop: 16, textAlign: 'center' }}>
                                 Pernikahan mungkin adalah keputusan yang paling personal bagi sepasang kekasih. Namun, di Australia, ribuan keputusan personal itu secara ajaib membentuk sebuah simfoni kolektif yang rapi. Ia bukan sekadar deretan angka di kalender, melainkan harmoni yang berdenyut mengikuti napas iklim benua ini.
                             </p>
@@ -331,7 +331,7 @@ export default function Chapter2({ index }) {
                 <FadeIn delay={0.1}>
                     <div style={{ display: 'flex', flexWrap: 'wrap-reverse', gap: 'clamp(28px, 4.5vw, 52px)', alignItems: 'center' }}>
                         <div style={{ flex: '1.45 1 320px' }}>
-                            <ChartCard title="Irama Pernikahan Bulanan Nasional" style={glassCard}>
+                            <ChartCard title="Trend Pernikahan Bulanan Nasional" style={glassCard}>
                                 <Line
                                     data={{
                                         labels: monthlyLabels,
