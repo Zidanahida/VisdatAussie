@@ -31,9 +31,9 @@ function AnimatedBackground() {
             {/* Soft orbs */}
             {[
                 { w: 500, h: 500, top: '-10%', left: '-10%', color: 'rgba(242,196,206,0.35)', dur: '12s' },
-                { w: 400, h: 400, top: '50%',  left: '70%',  color: 'rgba(201,168,76,0.2)',  dur: '16s' },
-                { w: 300, h: 300, top: '20%',  left: '60%',  color: 'rgba(168,184,154,0.25)', dur: '10s' },
-                { w: 350, h: 350, top: '70%',  left: '10%',  color: 'rgba(212,120,138,0.2)', dur: '14s' },
+                { w: 400, h: 400, top: '50%', left: '70%', color: 'rgba(201,168,76,0.2)', dur: '16s' },
+                { w: 300, h: 300, top: '20%', left: '60%', color: 'rgba(168,184,154,0.25)', dur: '10s' },
+                { w: 350, h: 350, top: '70%', left: '10%', color: 'rgba(212,120,138,0.2)', dur: '14s' },
             ].map((o, i) => (
                 <div key={i} style={{
                     position: 'absolute', width: o.w, height: o.h,
@@ -68,7 +68,7 @@ function AnimatedBackground() {
             {[
                 { size: 180, top: '15%', right: '8%', color: 'rgba(201,168,76,0.2)' },
                 { size: 120, bottom: '20%', left: '5%', color: 'rgba(212,120,138,0.15)' },
-                { size: 80,  top: '60%', right: '20%', color: 'rgba(168,184,154,0.2)' },
+                { size: 80, top: '60%', right: '20%', color: 'rgba(168,184,154,0.2)' },
             ].map((r, i) => (
                 <div key={`r${i}`} style={{
                     position: 'absolute', width: r.size, height: r.size,
@@ -87,12 +87,9 @@ export default function Intro({ index }) {
             <AnimatedBackground />
             <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', width: '100%' }}>
                 <FadeIn>
-                    <div style={{ fontSize: 76, marginBottom: 16, filter: 'drop-shadow(0 4px 12px rgba(212,120,138,0.3))' }}>
-                        💍🌸🦢
-                    </div>
                     <h1 style={{
-                        fontFamily: "'Playfair Display', serif",
-                        fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)',
+                        fontFamily: "'Great Vibes', cursive",
+                        fontSize: 'clamp(3.5rem, 7vw, 6rem)',
                         background: 'linear-gradient(135deg, #d4788a 0%, #c9a84c 50%, #d4788a 100%)',
                         backgroundSize: '200% auto',
                         WebkitBackgroundClip: 'text',
@@ -100,8 +97,10 @@ export default function Intro({ index }) {
                         backgroundClip: 'text',
                         animation: 'shimmer 4s linear infinite',
                         marginBottom: 12,
+                        lineHeight: 1.3, // ✅ tambahkan ini agar huruf sambung tidak terpotong
+                        letterSpacing: 2, // ✅ opsional, beri sedikit nafas
                     }}>
-                        Love Down Under
+                        Dibalik Angka Pernikahan
                     </h1>
                     <p style={{
                         fontSize: '1.05rem', color: '#a08080', letterSpacing: 4,

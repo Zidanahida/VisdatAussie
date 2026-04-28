@@ -414,7 +414,7 @@ export default function Chapter2({ index }) {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(28px, 4.5vw, 52px)', alignItems: 'flex-start' }}>
 
                         <div style={{ flex: '1.15 1 320px' }}>
-                            <ChartCard title="Peta Regional Australia: Frekuensi Pernikahan Terbanyak berdasarkan Hari" style={glassCard}>
+                            <ChartCard title="Peta Regional Australia: Frekuensi Pernikahan Terbanyak berdasarkan Musim/Bulan" style={glassCard}>
                                 <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
                                     <AustraliaMap
                                         data={Object.fromEntries(Object.entries(regionalPeakData).map(([k, v]) => [k, v.count]))}
