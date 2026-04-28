@@ -280,13 +280,13 @@ function MilestoneCard() {
             boxSizing: 'border-box',
         }}>
             <div style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)', marginBottom: 8 }}>🏛️</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)', color: '#3d2b2b', fontWeight: 700, marginBottom: 8 }}>
+            <div style={{ fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)', color: '#3d2b2b', fontWeight: 700, marginBottom: 8, fontFamily: "'Playfair Display', serif" }}>
                 7 Desember 2017
             </div>
             <div style={{ fontSize: '1rem', color: '#7a6a8a', lineHeight: 1.7, maxWidth: 520, margin: '0 auto' }}>
-                Australia mengesahkan undang-undang yang melegalkan pernikahan same-sex — menjadikannya salah satu dari sedikit negara di dunia yang melakukan hal ini. Untuk pertama kalinya, pasangan same-sex memiliki{' '}
-                <span style={{ color: '#b07cc6', fontWeight: 600 }}>pilihan hukum yang sama</span>{' '}
-                dengan pasangan lainnya.
+                Australia mengesahkan undang-undang yang mengizinkan pernikahan same-sex secara hukum. Perubahan regulasi ini membuka opsi baru bagi pasangan same-sex untuk{' '}
+                <span style={{ color: '#b07cc6', fontWeight: 600 }}>mencatatkan hubungan mereka secara resmi</span>{' '}
+                di hadapan negara, sama seperti pasangan lainnya.
             </div>
         </div>
     );
@@ -319,22 +319,17 @@ export default function Chapter4({ index }) {
                         <div style={{ flex: 1.2, minWidth: 320, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <ChapterLabel num={4} />
                             <Divider style={{ margin: '0 0 24px 0' }} />
-                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Sudah Ada Sejak Lama</h3>
+                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Apa yang Berubah di 2017?</h3>
                             <p style={storyTextStyle}>
-                                Kita sudah melihat bahwa de facto adalah pilihan sadar jutaan orang Australia. Tapi di dalam angka itu, tersimpan sebuah cerita yang berbeda.
+                                Di chapter sebelumnya kita melihat de facto sebagai pilihan yang tersebar di berbagai kelompok usia. Tapi ada satu kelompok yang membuat pola de facto ini punya konteks berbeda secara hukum.
                             </p>
                             <p style={storyTextStyle}>
-                                Ada pasangan yang hidup bersama bukan karena belum siap menikah — melainkan karena selama bertahun-tahun,{' '}
-                                <span style={highlightText}>hukum tidak pernah memberi mereka pilihan itu.</span>
+                                Sejak 1996, sensus Australia sudah mencatat pasangan same-sex yang tinggal bersama sebagai bagian dari data kependudukan. Jumlahnya sekitar{' '}
+                                <span style={highlightText}>10.000 pasangan</span> di 1996. Di 2021, angka itu tumbuh hampir delapan kali lipat menjadi sekitar{' '}
+                                <span style={highlightText}>80.000 pasangan</span>.
                             </p>
                             <p style={storyTextStyle}>
-                                Sejak 1996, data Australia sudah mencatat keberadaan pasangan same-sex yang hidup bersama. Di 1996 tercatat sekitar{' '}
-                                <span style={highlightText}>10.000 pasangan</span>. Di 2021, angka itu hampir menyentuh{' '}
-                                <span style={highlightText}>80.000</span> — tumbuh 8 kali lipat dalam 25 tahun.
-                            </p>
-                            <p style={storyTextStyle}>
-                                Selama seperempat abad itu, mereka hidup, berkomitmen, dan membangun kehidupan bersama. Tanpa pilihan untuk meresmikannya.{' '}
-                                <span style={highlightText}>Bukan karena tidak mau. Tapi karena tidak bisa.</span>
+                                Selama periode itu, pernikahan secara hukum belum tersedia bagi kelompok ini di Australia. Barulah pada akhir 2017, regulasi berubah dan opsi tersebut menjadi tersedia secara legal.
                             </p>
                         </div>
 
@@ -348,7 +343,7 @@ export default function Chapter4({ index }) {
                                     }
                                 </div>
                                 <p style={{ fontSize: '0.85rem', color: '#999', textAlign: 'center', marginTop: 14, lineHeight: 1.6 }}>
-                                    Pertumbuhan konsisten selama 25 tahun — jauh sebelum ada pengakuan hukum.
+                                    Pertumbuhan yang konsisten selama 25 tahun, tercatat dalam sensus sebelum adanya perubahan regulasi pernikahan.
                                 </p>
                             </ChartCard>
                         </div>
@@ -374,23 +369,23 @@ export default function Chapter4({ index }) {
                                     }
                                 </div>
                                 <p style={{ fontSize: '0.85rem', color: '#999', textAlign: 'center', marginTop: 14, lineHeight: 1.6 }}>
-                                    Lonjakan 2019 mencerminkan gelombang pertama pasangan yang sudah lama menunggu.
+                                    Lonjakan di 2019 adalah tahun penuh pertama sejak regulasi berlaku, sebelum terdampak pandemi di 2020.
                                 </p>
                             </ChartCard>
                         </div>
 
                         {/* Narasi kanan */}
                         <div style={{ flex: 1, minWidth: 320 }}>
-                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Apa yang Terjadi Setelahnya?</h3>
+                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Bagaimana Responnya?</h3>
                             <p style={storyTextStyle}>
-                                Di 2018 — tahun pertama setelah legalisasi — angkanya masih kecil. Wajar, undang-undang baru saja berlaku di penghujung 2017.
+                                Begitu regulasi berlaku, ABS mulai mencatat pernikahan same-sex sebagai kategori tersendiri. Di 2018, tahun pertama, angkanya masih sangat kecil karena undang-undang baru saja disahkan di penghujung 2017.
                             </p>
                             <p style={storyTextStyle}>
-                                Di 2019, angka melonjak ke lebih dari{' '}
-                                <span style={highlightText}>5.500 pernikahan</span>. Ini adalah gelombang pertama — pasangan yang langsung memanfaatkan pilihan baru yang tersedia.
+                                Di 2019 terjadi lonjakan signifikan, tercatat lebih dari{' '}
+                                <span style={highlightText}>5.500 pernikahan same-sex</span> dalam satu tahun. Ini adalah tahun pertama di mana data sepenuhnya mencerminkan kelompok yang sebelumnya belum punya akses legal ke institusi pernikahan.
                             </p>
                             <p style={storyTextStyle}>
-                                Di 2020 dan 2021, angka turun ke sekitar <span style={highlightText}>2.900</span> — sebagian besar karena pembatasan COVID yang mempengaruhi seluruh jenis pernikahan di Australia. Setelah gelombang awal mereda, angka mulai menemukan keseimbangannya.
+                                Di 2020 dan 2021, angka turun ke kisaran <span style={highlightText}>2.900</span> per tahun. Penurunan ini sejalan dengan tren pernikahan secara umum di Australia yang juga terdampak pembatasan akibat pandemi COVID-19.
                             </p>
                         </div>
                     </div>
@@ -402,17 +397,16 @@ export default function Chapter4({ index }) {
 
                         {/* Narasi kiri */}
                         <div style={{ flex: 1.2, minWidth: 320 }}>
-                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Tapi Tidak Semua Memilih Jalan yang Sama</h3>
+                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Pilihan yang Tidak Selalu Sama</h3>
                             <p style={storyTextStyle}>
-                                Dengan hak yang kini setara, apakah pasangan same-sex langsung berbondong-bondong menikah resmi?
+                                Yang menarik dari data ini bukan hanya berapa banyak yang menikah, tapi berapa banyak yang tidak.
                             </p>
                             <p style={storyTextStyle}>
-                                Ternyata tidak. Dari 10 pasangan same-sex, hanya{' '}
-                                <span style={highlightText}>2 yang menikah resmi</span> — 8 sisanya tetap memilih de facto. Ini hampir <span style={highlightText}>cermin sempurna</span> dari pasangan beda jenis, di mana 8 dari 10 memilih menikah resmi.
+                                Dari 10 pasangan same-sex, hanya{' '}
+                                <span style={highlightText}>2 yang tercatat menikah resmi</span>. Delapan sisanya masih berstatus de facto. Sementara pada pasangan beda jenis, polanya hampir terbalik: <span style={highlightText}>8 dari 10</span> memilih menikah resmi.
                             </p>
                             <p style={storyTextStyle}>
-                                Ini adalah data, bukan penilaian. Setiap kelompok membuat pilihan yang berbeda ketika dihadapkan pada opsi yang sama. De facto bagi banyak pasangan same-sex{' '}
-                                <span style={highlightText}>bukan lagi keterpaksaan</span> — ia sudah menjadi cara mereka mendefinisikan komitmen.
+                                Data ini menunjukkan bahwa tersedianya akses hukum tidak otomatis mengubah pola yang sudah terbentuk. Sebagian besar pasangan same-sex tampaknya tetap mempertahankan status de facto meski opsi menikah kini tersedia secara legal.
                             </p>
                         </div>
 
@@ -437,12 +431,12 @@ export default function Chapter4({ index }) {
                             width: '100%',
                             boxSizing: 'border-box',
                         }}>
-                            <div style={{ fontSize: '2rem', marginBottom: 16 }}>💍</div>
+                            <div style={{ fontSize: '2rem', marginBottom: 16 }}>📊</div>
                             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', color: '#3d2b2b', lineHeight: 1.8, marginBottom: 16 }}>
-                                Australia adalah studi kasus yang menarik — sebuah negara yang mengubah kebijakannya dan kemudian mengamati bagaimana masyarakatnya merespons.
+                                Perubahan regulasi di 2017 membuka akses baru, tapi data menunjukkan bahwa akses tidak selalu berujung pada perubahan perilaku yang seragam.
                             </p>
                             <p style={{ fontSize: '1rem', color: '#666', lineHeight: 1.8, marginBottom: 20 }}>
-                                Data menunjukkan bahwa ketika sebuah pilihan baru tersedia, tidak semua orang akan mengambilnya. Dan itu berlaku di mana-mana, untuk siapapun.
+                                Mayoritas pasangan same-sex di Australia masih berstatus de facto hingga 2021, sementara mayoritas pasangan beda jenis memilih menikah resmi. Pola ini menjadi salah satu studi sosial yang menarik untuk terus diamati dalam sensus-sensus berikutnya.
                             </p>
                             <div style={{
                                 display: 'inline-block',
@@ -452,7 +446,7 @@ export default function Chapter4({ index }) {
                                 border: '1.5px solid rgba(176,124,198,0.25)',
                             }}>
                                 <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: '#b07cc6', fontWeight: 700, margin: 0, fontStyle: 'italic' }}>
-                                    "Hak untuk memilih, dan keputusan yang diambil dari hak itu, adalah dua hal yang selalu berbeda."
+                                    "Akses hukum dan pilihan sosial adalah dua hal yang bergerak dengan kecepatannya masing-masing."
                                 </p>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: '#aaa', marginTop: 20 }}>
