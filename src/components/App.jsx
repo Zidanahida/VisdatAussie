@@ -63,12 +63,13 @@ export default function App() {
     ];
 
     const accentColors = [
-        '#d4788a',        
-        'rgb(255, 209, 247)',
+        '#d4788a',    
+        '#d78998',    
         '#4a9d5c',
+        'rgb(255, 209, 247)',
         '#b483ff',
         '#c9a84c',
-        '#d4788a',
+        ,
     ];
 
     const scrollTo = (i) => {
