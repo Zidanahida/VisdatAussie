@@ -4,22 +4,64 @@ import { colors } from './shared';
 export default function Footer() {
     return (
         <footer style={{
-            background: colors.dark, color: '#ccc',
-            minHeight: '30vh', display: 'flex', flexDirection: 'column',
-            justifyContent: 'center', alignItems: 'center',
-            textAlign: 'center', padding: 'clamp(24px, 5vw, 40px)', gap: 8,
-            boxSizing: 'border-box', width: '100%',
+            position: 'relative',
+            background: 'linear-gradient(180deg, #f5f9ff 0%, #fef3e8 55%, #fffaf7 100%)',
+            color: '#7a6a68',
+            minHeight: '30vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            padding: 'clamp(32px, 5vw, 48px) clamp(24px, 5vw, 40px)',
+            gap: 8,
+            boxSizing: 'border-box',
+            width: '100%',
+            overflow: 'hidden',
         }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", color: colors.blush, fontSize: '1.8rem', marginBottom: 8 }}>
+            {/* garis pemisah panjang */}
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 'min(86vw, 980px)',
+                height: 1,
+                background: 'linear-gradient(to right, transparent, rgba(212,120,138,0.32), transparent)',
+                pointerEvents: 'none',
+            }} />
+
+            <h2 style={{
+                fontFamily: "'Playfair Display', serif",
+                color: colors.rose,
+                fontSize: '1.8rem',
+                marginBottom: 8,
+                position: 'relative',
+                zIndex: 1,
+            }}>
                 💍 Love Down Under
             </h2>
-            <p style={{ fontSize: '0.9rem', color: '#aaa', maxWidth: 500, lineHeight: 1.7 }}>
+
+            <p style={{
+                fontSize: '0.9rem',
+                color: '#8a7d7a',
+                maxWidth: 500,
+                lineHeight: 1.7,
+                position: 'relative',
+                zIndex: 1,
+            }}>
                 Data visualisasi pernikahan Australia — menggabungkan data ABS (Australian Bureau of Statistics)
                 dan Sensus Penduduk 2021.
             </p>
-            {/* ✅ Div chapter buttons dihapus dari sini */}
-            <p style={{ fontSize: '0.75rem', color: '#666', marginTop: 20 }}>
-                © 2025 · Data: ABS Marriage Australia 2024, Census 2021
+
+            <p style={{
+                fontSize: '0.75rem',
+                color: '#a49a98',
+                marginTop: 20,
+                position: 'relative',
+                zIndex: 1,
+            }}>
+                © 2026 · Kelompok 2 - Visualisasi Data
             </p>
         </footer>
     );

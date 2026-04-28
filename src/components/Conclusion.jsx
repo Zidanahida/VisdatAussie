@@ -31,29 +31,41 @@ export default function Conclusion({ index }) {
             bg="linear-gradient(150deg, #fffaf7 0%, #fef3e8 40%, #f5f9ff 100%)"
             style={{ justifyContent: 'center', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}
         >
-            {/* Background dekoratif */}
+            {/* Background dekoratif dengan Gambar PNG */}
             <div style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden',
             }}>
-                {/* Lingkaran besar blur kiri */}
+                {/* Elemen Dekoratif Kiri & Kanan (Ganti nama file sesuai file kamu) */}
+                <img src="/deco-ring.png" alt="" style={{
+                    position: 'absolute', left: '3%', top: '15%',
+                    width: '150px', opacity: 0.15, transform: 'rotate(-15deg)',
+                }} />
+                
+                <img src="/deco-doves.png" alt="" style={{
+                    position: 'absolute', right: '3%', bottom: '15%',
+                    width: '180px', opacity: 0.15,
+                }} />
+
+                {/* Lingkaran besar blur */}
                 <div style={{
                     position: 'absolute', width: 500, height: 500,
                     borderRadius: '50%', top: '-10%', left: '-10%',
                     background: 'radial-gradient(circle, rgba(212,120,138,0.12) 0%, transparent 70%)',
                 }} />
-                {/* Lingkaran blur kanan bawah */}
                 <div style={{
                     position: 'absolute', width: 400, height: 400,
                     borderRadius: '50%', bottom: '-5%', right: '-5%',
                     background: 'radial-gradient(circle, rgba(180,131,255,0.1) 0%, transparent 70%)',
                 }} />
-                {/* Garis horisontal dekoratif */}
+                
+                {/* Garis dekoratif */}
                 <div style={{
                     position: 'absolute', top: '50%', left: '5%', right: '5%',
                     height: 1, background: 'linear-gradient(to right, transparent, rgba(212,120,138,0.15), transparent)',
                 }} />
             </div>
 
+            {/* Konten Teks */}
             <div
                 ref={containerRef}
                 style={{
@@ -62,7 +74,6 @@ export default function Conclusion({ index }) {
                     textAlign: 'center', gap: 0, padding: 'clamp(16px, 4vw, 40px)',
                 }}
             >
-                {/* Label atas */}
                 <div style={{
                     opacity: containerVisible ? 1 : 0,
                     transform: containerVisible ? 'translateY(0)' : 'translateY(20px)',
@@ -74,7 +85,6 @@ export default function Conclusion({ index }) {
                     Penutup
                 </div>
 
-                {/* Judul besar */}
                 <div style={{
                     opacity: containerVisible ? 1 : 0,
                     transform: containerVisible ? 'translateY(0)' : 'translateY(24px)',
@@ -89,7 +99,6 @@ export default function Conclusion({ index }) {
                     Masih Terus Berjalan
                 </div>
 
-                {/* Divider ornamen */}
                 <div style={{
                     opacity: containerVisible ? 1 : 0,
                     transition: 'opacity 0.6s ease 0.1s',
@@ -101,7 +110,6 @@ export default function Conclusion({ index }) {
                     <div style={{ width: 40, height: 1, background: colors.rose, opacity: 0.4 }} />
                 </div>
 
-                {/* Paragraf teks */}
                 {lines.map((line, i) => (
                     <div
                         key={i}
@@ -114,7 +122,6 @@ export default function Conclusion({ index }) {
                         }}
                     >
                         {i === 0 ? (
-                            // Kalimat pembuka — besar & italic
                             <p style={{
                                 fontFamily: "'Playfair Display', serif",
                                 fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)',
@@ -126,7 +133,6 @@ export default function Conclusion({ index }) {
                                 "{line.text}"
                             </p>
                         ) : i === lines.length - 1 ? (
-                            // Kalimat penutup — highlighted
                             <p style={{
                                 fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
                                 color: colors.gold,
@@ -138,7 +144,6 @@ export default function Conclusion({ index }) {
                                 — {line.text}
                             </p>
                         ) : (
-                            // Paragraf biasa
                             <p style={{
                                 fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)',
                                 color: '#5a5a5a',
@@ -150,15 +155,6 @@ export default function Conclusion({ index }) {
                         )}
                     </div>
                 ))}
-
-                {/* Divider bawah */}
-                <div style={{
-                    opacity: containerVisible ? 1 : 0,
-                    transition: 'opacity 0.6s ease 1.6s',
-                    width: 1, height: 48,
-                    background: 'linear-gradient(to bottom, rgba(212,120,138,0.2), transparent)',
-                    marginTop: 20,
-                }} />
             </div>
         </Section>
     );

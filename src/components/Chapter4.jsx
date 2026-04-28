@@ -12,7 +12,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, PointE
 
 // ─── Data hook ───────────────────────────────────────────────────────────────
 function useData4() {
-    const [mapData, setMapData]   = useState(null);  // per-state living together
+    const [mapData, setMapData] = useState(null);  // per-state living together
     const [trendData, setTrendData] = useState(null); // tren pernikahan same-sex
     const [livingTrendData, setLivingTrendData] = useState(null); // tren living together
 
@@ -419,7 +419,48 @@ export default function Chapter4({ index }) {
 
                 {/* ── ROW 4: Closing narasi ── */}
                 <FadeIn delay={0.3}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{
+                        position: 'relative',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                        overflow: 'visible',
+                        padding: '40px 70px',
+                        boxSizing: 'border-box',
+                    }}>
+                        {/* Ikon opera: kiri atas */}
+                        <img
+                            src="/deco-opera.png"
+                            alt=""
+                            style={{
+                                position: 'absolute',
+                                left: '18px',
+                                top: '10px',
+                                width: '150px',
+                                opacity: 0.24,
+                                pointerEvents: 'none',
+                                userSelect: 'none',
+                                zIndex: 0,
+                            }}
+                        />
+
+                        {/* Ikon frame: kanan bawah */}
+                        <img
+                            src="/deco-frame.png"
+                            alt=""
+                            style={{
+                                position: 'absolute',
+                                right: '18px',
+                                bottom: '10px',
+                                width: '160px',
+                                opacity: 0.22,
+                                pointerEvents: 'none',
+                                userSelect: 'none',
+                                zIndex: 0,
+                            }}
+                        />
+
                         <div style={{
                             background: 'white',
                             borderRadius: 20,
@@ -430,6 +471,8 @@ export default function Chapter4({ index }) {
                             maxWidth: 720,
                             width: '100%',
                             boxSizing: 'border-box',
+                            position: 'relative',
+                            zIndex: 1,
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: 16 }}>📊</div>
                             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', color: '#3d2b2b', lineHeight: 1.8, marginBottom: 16 }}>
@@ -455,7 +498,6 @@ export default function Chapter4({ index }) {
                         </div>
                     </div>
                 </FadeIn>
-
             </div>
         </Section>
     );
