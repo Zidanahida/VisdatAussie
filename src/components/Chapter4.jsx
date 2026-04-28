@@ -1,211 +1,107 @@
 import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
+import {
+    Chart as ChartJS,
+    CategoryScale, LinearScale, BarElement,
+    Tooltip, Legend, PointElement, LineElement
+} from 'chart.js';
+import { Bar, Line } from 'react-chartjs-2';
 import { Section, Divider, ChapterLabel, ChartCard, FadeIn, colors } from './shared';
 
-// Heatmap color scale based on same-sex count (light → dark purple)
-function heatColor(val, min, max) {
-    const t = (val - min) / (max - min);
-    const r = Math.round(237 - (237 - 80) * t);
-    const g = Math.round(220 - (220 - 40) * t);
-    const b = Math.round(255 - (255 - 160) * t);
-    return `rgb(${r},${g},${b})`;
-}
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, PointElement, LineElement);
 
-const nameToKey = {
-    'New South Wales': 'NSW',
-    'Victoria': 'VIC',
-    'Queensland': 'QLD',
-    'South Australia': 'SA',
-    'Western Australia': 'WA',
-    'Tasmania': 'TAS',
-    'Northern Territory': 'NT',
-    'Australian Capital Territory': 'ACT',
-};
-
+// ─── Data hook ───────────────────────────────────────────────────────────────
 function useData4() {
-    const [data, setData] = useState(null);
+    const [mapData, setMapData]   = useState(null);  // per-state living together
+    const [trendData, setTrendData] = useState(null); // tren pernikahan same-sex
+    const [livingTrendData, setLivingTrendData] = useState(null); // tren living together
+
     useEffect(() => {
+        // Sheet 1: per-state (existing data4.xlsx, rows 3–10)
         fetch('/data4.xlsx')
             .then(r => r.arrayBuffer())
             .then(buf => {
                 const wb = XLSX.read(buf, { type: 'array' });
+
+                // --- Map data (sheet 1) ---
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                // rows 3–10 = state data (0-indexed), col 0=name, col 5=same-sex count, col 7=total couples count
+                const nameToKey = {
+                    'New South Wales': 'NSW', 'Victoria': 'VIC', 'Queensland': 'QLD',
+                    'South Australia': 'SA', 'Western Australia': 'WA', 'Tasmania': 'TAS',
+                    'Northern Territory': 'NT', 'Australian Capital Territory': 'ACT',
+                };
                 const result = {};
                 rows.slice(3, 11).forEach(r => {
                     const key = nameToKey[r[0]];
                     if (key) result[key] = { sameSex: r[5], total: r[7] };
                 });
-                setData(result);
+                setMapData(result);
+
+                // --- Tren same-sex marriages (sheet 2 jika ada, fallback hardcode) ---
+                // Hardcode data tren 2018-2021 dari ABS
+                setTrendData([
+                    { year: '2018', count: 174 },
+                    { year: '2019', count: 5548 },
+                    { year: '2020', count: 2923 },
+                    { year: '2021', count: 2883 },
+                ]);
+
+                // --- Tren living together 1996-2021 ---
+                setLivingTrendData([
+                    { year: '1996', count: 10081 },
+                    { year: '2001', count: 19900 },
+                    { year: '2006', count: 25620 },
+                    { year: '2011', count: 33714 },
+                    { year: '2016', count: 46800 },
+                    { year: '2021', count: 79000 },
+                ]);
             });
     }, []);
-    return data;
+
+    return { mapData, trendData, livingTrendData };
 }
 
-function makeProjection(features, width, height, padding = 20) {
-    let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
-    const eachCoord = (coords) => {
-        if (typeof coords[0] === 'number') {
-            if (coords[0] < minLon) minLon = coords[0];
-            if (coords[0] > maxLon) maxLon = coords[0];
-            if (coords[1] < minLat) minLat = coords[1];
-            if (coords[1] > maxLat) maxLat = coords[1];
-        } else coords.forEach(eachCoord);
-    };
-    features.forEach(f => {
-        if (f.geometry.type === 'Polygon') eachCoord(f.geometry.coordinates);
-        else if (f.geometry.type === 'MultiPolygon') f.geometry.coordinates.forEach(p => eachCoord(p));
-    });
-
-    const scaleX = (width - padding * 2) / (maxLon - minLon);
-    const scaleY = (height - padding * 2) / (maxLat - minLat);
-    const scale = Math.min(scaleX, scaleY);
-
-    // Hitung sisa ruang untuk centering
-    const mapW = (maxLon - minLon) * scale;
-    const mapH = (maxLat - minLat) * scale;
-    const offsetX = (width - mapW) / 2;
-    const offsetY = (height - mapH) / 2;
-
-    return ([lon, lat]) => [
-        offsetX + (lon - minLon) * scale + 30,
-        height - offsetY - (lat - minLat) * scale + 10,
-    ];
-}
-
-function ringToPath(ring, project) {
-    return ring.map((c, i) => { const [x, y] = project(c); return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`; }).join(' ') + ' Z';
-}
-
-function featureToPath(feature, project) {
-    const geom = feature.geometry;
-    const parts = [];
-    if (geom.type === 'Polygon') geom.coordinates.forEach(r => parts.push(ringToPath(r, project)));
-    else if (geom.type === 'MultiPolygon') geom.coordinates.forEach(p => p.forEach(r => parts.push(ringToPath(r, project))));
-    return parts.join(' ');
-}
-
-function getCentroid(feature, project) {
-    const geom = feature.geometry;
-    const polygons = geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : [];
-    let bestCx = 0, bestCy = 0, bestArea = -1;
-    polygons.forEach(poly => {
-        const pts = poly[0].map(project);
-        const n = pts.length;
-        let area = 0, cx = 0, cy = 0;
-        for (let i = 0, j = n - 1; i < n; j = i++) {
-            const cross = pts[j][0] * pts[i][1] - pts[i][0] * pts[j][1];
-            area += cross; cx += (pts[j][0] + pts[i][0]) * cross; cy += (pts[j][1] + pts[i][1]) * cross;
-        }
-        area /= 2;
-        if (Math.abs(area) > bestArea) { bestArea = Math.abs(area); bestCx = cx / (6 * area); bestCy = cy / (6 * area); }
-    });
-    return [bestCx, bestCy];
-}
-
-const W = 600, H = 500;
-
-function AustraliaMapChart({ data }) {
-    const [geo, setGeo] = useState(null);
-    const [hovered, setHovered] = useState(null);
-    const [mouse, setMouse] = useState({ x: 0, y: 0 });
-
-    useEffect(() => {
-        fetch('/australian-states.min.geojson').then(r => r.json()).then(setGeo);
-    }, []);
-
-    if (!geo) return <div style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>Memuat peta…</div>;
-
-    const project = makeProjection(geo.features, W, H);
-    const sameSexValues = Object.values(data).map(d => d.sameSex);
-    const minVal = Math.min(...sameSexValues);
-    const maxVal = Math.max(...sameSexValues);
-
+// ─── Background decoration (selaras dengan Chapter3) ─────────────────────────
+function BgDecor() {
     return (
-        <div style={{ width: '100%' }}>
-            <svg
-                viewBox={`0 0 ${W} ${H}`}
-                style={{ width: '100%', filter: 'drop-shadow(0 6px 24px rgba(0,0,0,0.13))' }}
-                onMouseLeave={() => setHovered(null)}
-            >
-                {geo.features.map(feature => {
-                    const key = nameToKey[feature.properties.STATE_NAME];
-                    const val = key ? data[key] : undefined;
-                    const fill = key && data[key] ? heatColor(data[key].sameSex, minVal, maxVal) : '#ddd';
-                    const isHov = hovered === key;
-                    const [cx, cy] = getCentroid(feature, project);
-
-                    return (
-                        <g key={feature.id}>
-                            <path
-                                d={featureToPath(feature, project)}
-                                fill={fill}
-                                stroke="white"
-                                strokeWidth={isHov ? 2 : 0.8}
-                                strokeLinejoin="round"
-                                style={{ cursor: 'pointer', filter: isHov ? 'brightness(0.82) drop-shadow(0 2px 8px rgba(0,0,0,0.3))' : 'brightness(1)', transition: 'filter 0.18s' }}
-                                onMouseMove={e => {
-                                    const rect = e.currentTarget.closest('svg').getBoundingClientRect();
-                                    setMouse({ x: (e.clientX - rect.left) / rect.width * W, y: (e.clientY - rect.top) / rect.height * H });
-                                    setHovered(key);
-                                }}
-                            />
-                            {key && val && (
-                                <text x={cx} y={cy} textAnchor="middle"
-                                    style={{ fontSize: key === 'ACT' ? '8px' : '13px', fontWeight: 700, fill: 'white', pointerEvents: 'none', paintOrder: 'stroke', stroke: 'rgba(0,0,0,0.4)', strokeWidth: '3px' }}>
-                                    {key}
-                                </text>
-                            )}
-                        </g>
-                    );
-                })}
-
-                {hovered && data[hovered] && (() => {
-                    const tx = Math.min(Math.max(mouse.x, 120), W - 120);
-                    const ty = Math.max(mouse.y - 20, 70);
-                    const label = Object.entries(nameToKey).find(([, v]) => v === hovered)?.[0] || hovered;
-                    const { sameSex, total } = data[hovered];
-                    return (
-                        <g style={{ pointerEvents: 'none' }}>
-                            <rect x={tx - 115} y={ty - 68} width={230} height={72} rx={10} fill="rgba(20,10,10,0.88)" />
-                            <text x={tx} y={ty - 48} textAnchor="middle" style={{ fontSize: '11px', fill: '#f2c4ce', fontWeight: 700 }}>{label}</text>
-                            <text x={tx} y={ty - 30} textAnchor="middle" style={{ fontSize: '12px', fill: 'white' }}>
-                                Same-Sex: {sameSex.toLocaleString()}
-                            </text>
-                            <text x={tx} y={ty - 10} textAnchor="middle" style={{ fontSize: '12px', fill: '#c9a84c' }}>
-                                Total Couples: {total.toLocaleString()}
-                            </text>
-                        </g>
-                    );
-                })()}
-            </svg>
-
-            {/* Heatmap legend */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.72rem', color: '#888' }}>Sedikit</span>
-                <div style={{ width: 160, height: 12, borderRadius: 6, background: `linear-gradient(to right, ${heatColor(minVal, minVal, maxVal)}, ${heatColor(maxVal, minVal, maxVal)})` }} />
-                <span style={{ fontSize: '0.72rem', color: '#888' }}>Banyak</span>
-            </div>
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <style>{`
+                @keyframes floatUp4 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-20px) rotate(5deg)} }
+                @keyframes pulse4 { 0%,100%{opacity:0.1} 50%{opacity:0.25} }
+            `}</style>
+            <div style={{ position: 'absolute', width: 500, height: 500, top: '-10%', left: '-10%', background: 'radial-gradient(circle, rgba(180,120,220,0.15) 0%, transparent 70%)', borderRadius: '50%', animation: 'pulse4 8s infinite' }} />
+            <div style={{ position: 'absolute', width: 400, height: 400, bottom: '-5%', right: '-5%', background: 'radial-gradient(circle, rgba(212,120,138,0.15) 0%, transparent 70%)', borderRadius: '50%', animation: 'pulse4 10s infinite reverse' }} />
+            {[
+                { size: 120, top: '20%', right: '10%', color: 'rgba(180,120,220,0.15)' },
+                { size: 80, bottom: '30%', left: '8%', color: 'rgba(212,120,138,0.2)' }
+            ].map((r, i) => (
+                <div key={i} style={{
+                    position: 'absolute', width: r.size, height: r.size,
+                    top: r.top, bottom: r.bottom, left: r.left, right: r.right,
+                    border: `2px solid ${r.color}`, borderRadius: '50%',
+                    animation: `floatUp4 ${6 + i * 2}s ease-in-out infinite`
+                }} />
+            ))}
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(180,120,220,0.07) 1.5px, transparent 1.5px)', backgroundSize: '32px 32px' }} />
         </div>
     );
 }
 
-function BgDecor() {
-    return (
-        <>
-            <style>{`
-                @keyframes floatDiamond { 0%,100%{transform:rotate(45deg) translate(0,0)} 50%{transform:rotate(45deg) translate(15px,-20px)} }
-                @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-            `}</style>
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(-45deg, #f7f5ff, #ede8f5, #fce4ec, #e8f5e9)', backgroundSize: '400% 400%', animation: 'gradientShift 15s ease infinite', opacity: 0.6 }} />
-            {[{ size: 60, top: '10%', left: '5%', color: 'rgba(180,120,220,0.15)', dur: '8s' }, { size: 40, top: '70%', left: '85%', color: 'rgba(212,120,138,0.15)', dur: '11s' }, { size: 80, top: '40%', left: '90%', color: 'rgba(100,149,237,0.1)', dur: '14s' }].map((d, i) => (
-                <div key={i} style={{ position: 'absolute', width: d.size, height: d.size, top: d.top, left: d.left, background: d.color, transform: 'rotate(45deg)', animation: `floatDiamond ${d.dur} ease-in-out infinite`, animationDelay: `${i * 1.5}s`, pointerEvents: 'none', borderRadius: 4 }} />
-            ))}
-        </>
-    );
-}
+// ─── Tooltip style (sama dengan Chapter3) ────────────────────────────────────
+const flatTooltip = {
+    backgroundColor: '#ffffff',
+    titleColor: '#3d2b2b',
+    bodyColor: '#555',
+    borderColor: 'rgba(180,120,220,0.3)',
+    borderWidth: 1,
+    padding: 12,
+    boxPadding: 6,
+    usePointStyle: true,
+    titleFont: { size: 13, family: "'Playfair Display', serif", weight: 'bold' },
+    bodyFont: { size: 12, family: "'Nunito', sans-serif" },
+};
 
-// SVG person icon
+// ─── Person Icon ──────────────────────────────────────────────────────────────
 function PersonIcon({ color, size = 48 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
@@ -215,43 +111,134 @@ function PersonIcon({ color, size = 48 }) {
     );
 }
 
-function SameSexIllustration() {
+// ─── Chart: Tren Living Together ─────────────────────────────────────────────
+function LivingTrendChart({ data }) {
+    const chartData = {
+        labels: data.map(d => d.year),
+        datasets: [{
+            label: 'Pasangan Same-Sex Living Together',
+            data: data.map(d => d.count),
+            borderColor: '#b07cc6',
+            backgroundColor: 'rgba(176,124,198,0.12)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#b07cc6',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+        }],
+    };
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                ...flatTooltip,
+                callbacks: {
+                    label: ctx => ` ${ctx.parsed.y.toLocaleString()} pasangan`,
+                },
+            },
+        },
+        scales: {
+            x: { grid: { display: false }, ticks: { font: { family: "'Nunito', sans-serif" } } },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.05)' },
+                ticks: {
+                    font: { family: "'Nunito', sans-serif" },
+                    callback: v => v.toLocaleString(),
+                },
+            },
+        },
+    };
+    return <Line data={chartData} options={options} />;
+}
+
+// ─── Chart: Tren Same-Sex Marriages ──────────────────────────────────────────
+function MarriageTrendChart({ data }) {
+    const chartData = {
+        labels: data.map(d => d.year),
+        datasets: [{
+            label: 'Pernikahan Same-Sex',
+            data: data.map(d => d.count),
+            backgroundColor: data.map((_, i) => i === 1 ? '#b07cc6' : 'rgba(176,124,198,0.45)'),
+            borderRadius: 8,
+            borderSkipped: false,
+        }],
+    };
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                ...flatTooltip,
+                callbacks: {
+                    label: ctx => ` ${ctx.parsed.y.toLocaleString()} pernikahan`,
+                },
+            },
+        },
+        scales: {
+            x: { grid: { display: false }, ticks: { font: { family: "'Nunito', sans-serif" } } },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.05)' },
+                ticks: {
+                    font: { family: "'Nunito', sans-serif" },
+                    callback: v => v.toLocaleString(),
+                },
+            },
+        },
+    };
+    return <Bar data={chartData} options={options} />;
+}
+
+// ─── Illustration: 10 Persons Waffle ─────────────────────────────────────────
+function WaffleIllustration() {
     return (
         <div style={{
-            background: 'white', borderRadius: 20, padding: '24px 32px',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-            maxWidth: 600, width: '100%', boxSizing: 'border-box', textAlign: 'center',
+            background: 'white', borderRadius: 20, padding: '28px 32px',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.06)', width: '100%', boxSizing: 'border-box',
         }}>
             {/* Same-sex */}
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: '#3d2b2b', marginBottom: 6 }}>
-                Dari 10 Pasangan Same-Sex...
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: '#9a7a9a', marginBottom: 12, lineHeight: 1.6 }}>
-                Hanya <strong style={{ color: '#b07cc6' }}>2</strong> memilih menikah resmi, <strong style={{ color: '#bbb' }}>8</strong> memilih de facto.
-            </p>
-            <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
-                {Array.from({ length: 10 }).map((_, i) => <PersonIcon key={i} color={i < 2 ? '#b07cc6' : '#ccc'} size={40} />)}
+            <div style={{ marginBottom: 20 }}>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: '#3d2b2b', marginBottom: 4, fontWeight: 700 }}>
+                    Dari 10 Pasangan Same-Sex...
+                </p>
+                <p style={{ fontSize: '0.82rem', color: '#9a7a9a', marginBottom: 10, lineHeight: 1.6 }}>
+                    Hanya <strong style={{ color: '#b07cc6' }}>2</strong> memilih menikah resmi,{' '}
+                    <strong style={{ color: '#ccc' }}>8</strong> tetap memilih de facto.
+                </p>
+                <div style={{ display: 'flex', gap: 4 }}>
+                    {Array.from({ length: 10 }).map((_, i) => (
+                        <PersonIcon key={i} color={i < 2 ? '#b07cc6' : '#ddd'} size={38} />
+                    ))}
+                </div>
             </div>
 
-            <div style={{ width: '100%', height: 1, background: '#f0f0f0', margin: '20px 0' }} />
+            <div style={{ width: '100%', height: 1, background: '#f0f0f0', margin: '16px 0' }} />
 
             {/* Different-sex */}
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: '#3d2b2b', marginBottom: 6 }}>
-                Dari 10 Pasangan Different-Sex...
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: '#9a7a9a', marginBottom: 12, lineHeight: 1.6 }}>
-                Sebanyak <strong style={{ color: '#b07cc6' }}>8</strong> memilih menikah resmi, hanya <strong style={{ color: '#bbb' }}>2</strong> memilih de facto.
-            </p>
-            <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
-                {Array.from({ length: 10 }).map((_, i) => <PersonIcon key={i} color={i < 8 ? '#b07cc6' : '#ccc'} size={40} />)}
+            <div>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: '#3d2b2b', marginBottom: 4, fontWeight: 700 }}>
+                    Dari 10 Pasangan Beda Jenis...
+                </p>
+                <p style={{ fontSize: '0.82rem', color: '#9a7a9a', marginBottom: 10, lineHeight: 1.6 }}>
+                    Sebanyak <strong style={{ color: '#d4788a' }}>8</strong> memilih menikah resmi, hanya{' '}
+                    <strong style={{ color: '#ccc' }}>2</strong> memilih de facto.
+                </p>
+                <div style={{ display: 'flex', gap: 4 }}>
+                    {Array.from({ length: 10 }).map((_, i) => (
+                        <PersonIcon key={i} color={i < 8 ? '#d4788a' : '#ddd'} size={38} />
+                    ))}
+                </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#b07cc6', fontWeight: 600 }}>
-                    <PersonIcon color="#b07cc6" size={14} /> Menikah
+            <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 24, marginTop: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: '#b07cc6', fontWeight: 600 }}>
+                    <PersonIcon color="#b07cc6" size={14} /> Menikah (same-sex)
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#bbb', fontWeight: 600 }}>
-                    <PersonIcon color="#ccc" size={14} /> De Facto
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: '#d4788a', fontWeight: 600 }}>
+                    <PersonIcon color="#d4788a" size={14} /> Menikah (beda jenis)
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: '#ccc', fontWeight: 600 }}>
+                    <PersonIcon color="#ddd" size={14} /> De Facto
                 </div>
             </div>
             <p style={{ fontSize: '0.72rem', color: '#aaa', marginTop: 10 }}>Sumber: ABS Census 2021</p>
@@ -259,44 +246,222 @@ function SameSexIllustration() {
     );
 }
 
+// ─── Shared typography (sama dengan Chapter3) ─────────────────────────────────
+const storyTitleStyle = {
+    fontFamily: "'Caveat', cursive",
+    fontSize: 'clamp(2.4rem, 4vw, 3.4rem)',
+    color: '#3d2b2b',
+    lineHeight: 1.1,
+};
 
+const storyTextStyle = {
+    fontSize: '1rem',
+    color: '#666',
+    lineHeight: 1.8,
+    marginBottom: 16,
+};
+
+const highlightText = {
+    color: '#b07cc6',
+    fontWeight: 600,
+};
+
+// ─── Milestone card: 7 Des 2017 ───────────────────────────────────────────────
+function MilestoneCard() {
+    return (
+        <div style={{
+            background: 'linear-gradient(135deg, #f3eaff 0%, #fce4ec 100%)',
+            borderRadius: 20,
+            padding: 'clamp(24px, 4vw, 40px)',
+            textAlign: 'center',
+            boxShadow: '0 4px 24px rgba(176,124,198,0.15)',
+            border: '1.5px solid rgba(176,124,198,0.2)',
+            width: '100%',
+            boxSizing: 'border-box',
+        }}>
+            <div style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)', marginBottom: 8 }}>🏛️</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)', color: '#3d2b2b', fontWeight: 700, marginBottom: 8 }}>
+                7 Desember 2017
+            </div>
+            <div style={{ fontSize: '1rem', color: '#7a6a8a', lineHeight: 1.7, maxWidth: 520, margin: '0 auto' }}>
+                Australia mengesahkan undang-undang yang melegalkan pernikahan same-sex — menjadikannya salah satu dari sedikit negara di dunia yang melakukan hal ini. Untuk pertama kalinya, pasangan same-sex memiliki{' '}
+                <span style={{ color: '#b07cc6', fontWeight: 600 }}>pilihan hukum yang sama</span>{' '}
+                dengan pasangan lainnya.
+            </div>
+        </div>
+    );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Chapter4({ index }) {
-    const data4 = useData4();
+    const { mapData, trendData, livingTrendData } = useData4();
 
     return (
-        <Section index={index} bg="#f0eeff">
+        <Section
+            index={index}
+            bg="linear-gradient(150deg, #fdf8ff 0%, #f5eeff 50%, #fff8fa 100%)"
+            style={{ overflow: 'hidden' }}
+        >
             <BgDecor />
-            <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <FadeIn>
-                    <ChapterLabel num={4} title="🏳️‍🌈 Pernikahan Same-Sex & Keberagaman" />
-                    <Divider />
-                    <p style={{ fontSize: '0.95rem', color: '#7a6a8a', maxWidth: 600, textAlign: 'center', marginBottom: 36, lineHeight: 1.8 }}>
-                        Sejak dilegalkan pada Desember 2017, pernikahan same-sex terus meningkat.
-                        Berikut sebaran pasangan same-sex dan total pasangan per negara bagian berdasarkan Sensus 2021.
-                    </p>
-                </FadeIn>
 
-                {!data4 ? (
-                    <div style={{ color: '#aaa' }}>Memuat data...</div>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, width: '100%', maxWidth: 600 }}>
-                        <FadeIn delay={0.1}>
-                            <ChartCard title="Sebaran Same-Sex Couples & Total Couples per Negara Bagian (2021)" style={{ maxWidth: 600, width: '100%', paddingTop: 12 }}>
-                                <div style={{ marginTop: -8 }}>
-                                    <AustraliaMapChart data={data4} />
+            <div style={{
+                position: 'relative', zIndex: 1,
+                width: '100%', maxWidth: 1120, boxSizing: 'border-box',
+                display: 'flex', flexDirection: 'column',
+                gap: 'clamp(50px, 8vw, 80px)',
+            }}>
+
+                {/* ── ROW 1: Transisi + Tren Living Together ── */}
+                <FadeIn>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(32px, 5vw, 60px)', alignItems: 'center' }}>
+
+                        {/* Narasi kiri */}
+                        <div style={{ flex: 1.2, minWidth: 320, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <ChapterLabel num={4} />
+                            <Divider style={{ margin: '0 0 24px 0' }} />
+                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Sudah Ada Sejak Lama</h3>
+                            <p style={storyTextStyle}>
+                                Kita sudah melihat bahwa de facto adalah pilihan sadar jutaan orang Australia. Tapi di dalam angka itu, tersimpan sebuah cerita yang berbeda.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Ada pasangan yang hidup bersama bukan karena belum siap menikah — melainkan karena selama bertahun-tahun,{' '}
+                                <span style={highlightText}>hukum tidak pernah memberi mereka pilihan itu.</span>
+                            </p>
+                            <p style={storyTextStyle}>
+                                Sejak 1996, data Australia sudah mencatat keberadaan pasangan same-sex yang hidup bersama. Di 1996 tercatat sekitar{' '}
+                                <span style={highlightText}>10.000 pasangan</span>. Di 2021, angka itu hampir menyentuh{' '}
+                                <span style={highlightText}>80.000</span> — tumbuh 8 kali lipat dalam 25 tahun.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Selama seperempat abad itu, mereka hidup, berkomitmen, dan membangun kehidupan bersama. Tanpa pilihan untuk meresmikannya.{' '}
+                                <span style={highlightText}>Bukan karena tidak mau. Tapi karena tidak bisa.</span>
+                            </p>
+                        </div>
+
+                        {/* Chart kanan */}
+                        <div style={{ flex: 0.8, minWidth: 300 }}>
+                            <ChartCard title="Total Same-Sex Couples Living Together (1996–2021)">
+                                <div style={{ padding: '10px 0' }}>
+                                    {livingTrendData
+                                        ? <LivingTrendChart data={livingTrendData} />
+                                        : <div style={{ color: '#aaa', textAlign: 'center' }}>Memuat data…</div>
+                                    }
                                 </div>
-                                <p style={{ fontSize: '0.75rem', color: '#aaa', textAlign: 'center', marginTop: 10 }}>
-                                    Hover tiap wilayah untuk melihat detail · Sumber: ABS Census 2021
+                                <p style={{ fontSize: '0.85rem', color: '#999', textAlign: 'center', marginTop: 14, lineHeight: 1.6 }}>
+                                    Pertumbuhan konsisten selama 25 tahun — jauh sebelum ada pengakuan hukum.
                                 </p>
                             </ChartCard>
-                        </FadeIn>
-
-                        <FadeIn delay={0.2}>
-                            <SameSexIllustration />
-                        </FadeIn>
-
+                        </div>
                     </div>
-                )}
+                </FadeIn>
+
+                {/* ── MILESTONE CARD: 7 Des 2017 ── */}
+                <FadeIn delay={0.1}>
+                    <MilestoneCard />
+                </FadeIn>
+
+                {/* ── ROW 2: Tren Marriage + Narasi ── */}
+                <FadeIn delay={0.15}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap-reverse', gap: 'clamp(32px, 5vw, 60px)', alignItems: 'center' }}>
+
+                        {/* Chart kiri */}
+                        <div style={{ flex: 1, minWidth: 300 }}>
+                            <ChartCard title="Total Same-Sex Marriages per Tahun (2018–2021)">
+                                <div style={{ padding: '10px 0' }}>
+                                    {trendData
+                                        ? <MarriageTrendChart data={trendData} />
+                                        : <div style={{ color: '#aaa', textAlign: 'center' }}>Memuat data…</div>
+                                    }
+                                </div>
+                                <p style={{ fontSize: '0.85rem', color: '#999', textAlign: 'center', marginTop: 14, lineHeight: 1.6 }}>
+                                    Lonjakan 2019 mencerminkan gelombang pertama pasangan yang sudah lama menunggu.
+                                </p>
+                            </ChartCard>
+                        </div>
+
+                        {/* Narasi kanan */}
+                        <div style={{ flex: 1, minWidth: 320 }}>
+                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Apa yang Terjadi Setelahnya?</h3>
+                            <p style={storyTextStyle}>
+                                Di 2018 — tahun pertama setelah legalisasi — angkanya masih kecil. Wajar, undang-undang baru saja berlaku di penghujung 2017.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Di 2019, angka melonjak ke lebih dari{' '}
+                                <span style={highlightText}>5.500 pernikahan</span>. Ini adalah gelombang pertama — pasangan yang langsung memanfaatkan pilihan baru yang tersedia.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Di 2020 dan 2021, angka turun ke sekitar <span style={highlightText}>2.900</span> — sebagian besar karena pembatasan COVID yang mempengaruhi seluruh jenis pernikahan di Australia. Setelah gelombang awal mereda, angka mulai menemukan keseimbangannya.
+                            </p>
+                        </div>
+                    </div>
+                </FadeIn>
+
+                {/* ── ROW 3: Waffle + Narasi ── */}
+                <FadeIn delay={0.2}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(32px, 5vw, 60px)', alignItems: 'center' }}>
+
+                        {/* Narasi kiri */}
+                        <div style={{ flex: 1.2, minWidth: 320 }}>
+                            <h3 style={{ ...storyTitleStyle, marginBottom: 16 }}>Tapi Tidak Semua Memilih Jalan yang Sama</h3>
+                            <p style={storyTextStyle}>
+                                Dengan hak yang kini setara, apakah pasangan same-sex langsung berbondong-bondong menikah resmi?
+                            </p>
+                            <p style={storyTextStyle}>
+                                Ternyata tidak. Dari 10 pasangan same-sex, hanya{' '}
+                                <span style={highlightText}>2 yang menikah resmi</span> — 8 sisanya tetap memilih de facto. Ini hampir <span style={highlightText}>cermin sempurna</span> dari pasangan beda jenis, di mana 8 dari 10 memilih menikah resmi.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Ini adalah data, bukan penilaian. Setiap kelompok membuat pilihan yang berbeda ketika dihadapkan pada opsi yang sama. De facto bagi banyak pasangan same-sex{' '}
+                                <span style={highlightText}>bukan lagi keterpaksaan</span> — ia sudah menjadi cara mereka mendefinisikan komitmen.
+                            </p>
+                        </div>
+
+                        {/* Waffle kanan */}
+                        <div style={{ flex: 0.8, minWidth: 300 }}>
+                            <WaffleIllustration />
+                        </div>
+                    </div>
+                </FadeIn>
+
+                {/* ── ROW 4: Closing narasi ── */}
+                <FadeIn delay={0.3}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{
+                            background: 'white',
+                            borderRadius: 20,
+                            padding: 'clamp(28px, 4vw, 48px)',
+                            boxShadow: '0 4px 24px rgba(176,124,198,0.1)',
+                            border: '1.5px solid rgba(176,124,198,0.15)',
+                            textAlign: 'center',
+                            maxWidth: 720,
+                            width: '100%',
+                            boxSizing: 'border-box',
+                        }}>
+                            <div style={{ fontSize: '2rem', marginBottom: 16 }}>💍</div>
+                            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', color: '#3d2b2b', lineHeight: 1.8, marginBottom: 16 }}>
+                                Australia adalah studi kasus yang menarik — sebuah negara yang mengubah kebijakannya dan kemudian mengamati bagaimana masyarakatnya merespons.
+                            </p>
+                            <p style={{ fontSize: '1rem', color: '#666', lineHeight: 1.8, marginBottom: 20 }}>
+                                Data menunjukkan bahwa ketika sebuah pilihan baru tersedia, tidak semua orang akan mengambilnya. Dan itu berlaku di mana-mana, untuk siapapun.
+                            </p>
+                            <div style={{
+                                display: 'inline-block',
+                                padding: '14px 28px',
+                                borderRadius: 40,
+                                background: 'linear-gradient(135deg, rgba(176,124,198,0.12), rgba(212,120,138,0.12))',
+                                border: '1.5px solid rgba(176,124,198,0.25)',
+                            }}>
+                                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: '#b07cc6', fontWeight: 700, margin: 0, fontStyle: 'italic' }}>
+                                    "Hak untuk memilih, dan keputusan yang diambil dari hak itu, adalah dua hal yang selalu berbeda."
+                                </p>
+                            </div>
+                            <p style={{ fontSize: '0.8rem', color: '#aaa', marginTop: 20 }}>
+                                Sumber: ABS Marriage Australia 2021, Census 2021
+                            </p>
+                        </div>
+                    </div>
+                </FadeIn>
+
             </div>
         </Section>
     );
