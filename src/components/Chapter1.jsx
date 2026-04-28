@@ -149,31 +149,176 @@ function PopulationPyramid({ ageLabels, maleCounts, femaleCounts, maxVal }) {
 }
 
 // ── Background decoration ───────────────────────────────────────────────────
+const ch1Styles = `
+    @keyframes ch1Float { 0%,100%{transform:translateY(0) translateX(0) rotate(0deg)} 33%{transform:translateY(-18px) translateX(7px) rotate(2deg)} 66%{transform:translateY(10px) translateX(-5px) rotate(-1.5deg)} }
+    @keyframes ch1Pulse { 0%,100%{opacity:0.1; transform:scale(1)} 50%{opacity:0.24; transform:scale(1.06)} }
+    @keyframes ch1Scan  { 0%{transform:translateY(-100%);opacity:0} 10%{opacity:0.3} 90%{opacity:0.3} 100%{transform:translateY(200vh);opacity:0} }
+    @keyframes ch1Morph { 0%,100%{border-radius:58% 42% 54% 46%/48% 58% 42% 52%} 50%{border-radius:42% 58% 46% 54%/58% 42% 58% 42%} }
+    @keyframes ch1Petal { 0%{transform:translateY(-60px) rotate(0deg) scale(1); opacity:0.55} 100%{transform:translateY(105vh) rotate(480deg) scale(0.4); opacity:0} }
+`;
+
 function BgDecor() {
+    const particles = Array.from({ length: 20 }, (_, i) => ({
+        size: 2 + (i % 3),
+        top: `${5 + (i * 4.9) % 88}%`,
+        left: `${2 + (i * 5.3) % 95}%`,
+        dur: `${10 + (i % 7) * 2.5}s`,
+        delay: `${(i * 0.75) % 6}s`,
+    }));
+
+    const petals = Array.from({ length: 14 }, (_, i) => ({
+        size: 7 + (i % 4) * 3,
+        left: `${(i * 7.3) % 100}%`,
+        dur: `${8 + (i % 5) * 2}s`,
+        delay: `${(i * 1.1) % 10}s`,
+    }));
+
     return (
-        <>
-            <style>{`
-                @keyframes waveMove { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-                @keyframes floatUp  { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-20px) rotate(5deg)} }
-            `}</style>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, overflow: 'hidden', pointerEvents: 'none' }}>
-                <svg viewBox="0 0 1440 120" style={{ width: '200%', animation: 'waveMove 12s linear infinite' }} preserveAspectRatio="none">
-                    <path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 L1440,120 L0,120 Z" fill="rgba(212,120,138,0.07)" />
-                    <path d="M0,80 C240,40 480,100 720,80 C960,40 1200,100 1440,80 L1440,120 L0,120 Z" fill="rgba(201,168,76,0.06)" />
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <style>{ch1Styles}</style>
+
+            {/* Gradient mesh */}
+            <div style={{
+                position: 'absolute', inset: 0,
+                background: `
+                    radial-gradient(ellipse 70% 50% at 10% 20%, rgba(212,120,138,0.13) 0%, transparent 58%),
+                    radial-gradient(ellipse 55% 70% at 88% 80%, rgba(201,168,76,0.1) 0%, transparent 58%),
+                    radial-gradient(ellipse 40% 40% at 55% 48%, rgba(212,120,138,0.07) 0%, transparent 52%)
+                `,
+            }} />
+
+            {/* Dot matrix */}
+            <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: 'radial-gradient(circle, rgba(212,120,138,0.1) 1.5px, transparent 1.5px)',
+                backgroundSize: '36px 36px',
+            }} />
+
+            {/* Line grid */}
+            <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: `
+                    linear-gradient(rgba(212,120,138,0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(212,120,138,0.035) 1px, transparent 1px)
+                `,
+                backgroundSize: '100px 100px',
+            }} />
+
+            {/* Scan line */}
+            <div style={{
+                position: 'absolute', left: 0, right: 0, height: 2, top: 0,
+                background: 'linear-gradient(90deg, transparent, rgba(212,120,138,0.13), transparent)',
+                animation: 'ch1Scan 13s linear infinite',
+            }} />
+
+            {/* Floating particles */}
+            {particles.map((p, i) => (
+                <div key={`p${i}`} style={{
+                    position: 'absolute', width: p.size, height: p.size,
+                    top: p.top, left: p.left,
+                    background: 'rgba(212,120,138,0.4)',
+                    borderRadius: '50%',
+                    animation: `ch1Float ${p.dur} ease-in-out infinite`,
+                    animationDelay: p.delay,
+                }} />
+            ))}
+
+            {/* Falling petals */}
+            {petals.map((p, i) => (
+                <div key={`petal${i}`} style={{
+                    position: 'absolute', top: '-40px', left: p.left,
+                    width: p.size, height: p.size * 1.4,
+                    background: `hsl(${340 + (i % 4) * 8}, 65%, ${78 + (i % 3) * 5}%)`,
+                    borderRadius: '50% 0 50% 0',
+                    animation: `ch1Petal ${p.dur} linear ${p.delay} infinite`,
+                    opacity: 0.45,
+                }} />
+            ))}
+
+            {/* Corner brackets */}
+            <div style={{ position: 'absolute', top: 36, left: 36 }}>
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <path d="M2 62 L2 2 L62 2" stroke="rgba(212,120,138,0.3)" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="2" cy="2" r="3.5" fill="rgba(212,120,138,0.45)" />
+                    <circle cx="62" cy="2" r="2" fill="rgba(212,120,138,0.2)" />
                 </svg>
             </div>
-            {['10%', '30%', '55%', '75%', '90%'].map((left, i) => (
-                <div key={i} style={{
-                    position: 'absolute', top: `${15 + i * 12}%`, left,
-                    fontSize: 16 + i * 4, opacity: 0.08,
-                    animation: `floatUp ${5 + i}s ease-in-out infinite`,
-                    animationDelay: `${i * 0.8}s`, pointerEvents: 'none',
-                }}>💍</div>
+            <div style={{ position: 'absolute', bottom: 36, right: 36, transform: 'rotate(180deg)' }}>
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <path d="M2 62 L2 2 L62 2" stroke="rgba(201,168,76,0.3)" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="2" cy="2" r="3.5" fill="rgba(201,168,76,0.45)" />
+                </svg>
+            </div>
+            <div style={{ position: 'absolute', top: 36, right: 36 }}>
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M30 2 L30 30 L2 30" stroke="rgba(212,120,138,0.18)" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+            </div>
+            <div style={{ position: 'absolute', bottom: 36, left: 36 }}>
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M2 30 L2 2 L30 2" stroke="rgba(201,168,76,0.18)" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+            </div>
+
+            {/* Atmospheric orbs */}
+            {[
+                { w: 520, h: 520, top: '-12%', left: '-10%', color: 'rgba(212,120,138,0.12)', dur: '18s' },
+                { w: 400, h: 400, top: '55%', right: '-7%', color: 'rgba(201,168,76,0.1)', dur: '22s' },
+                { w: 260, h: 260, top: '25%', left: '58%', color: 'rgba(212,120,138,0.08)', dur: '14s' },
+                { w: 180, h: 180, top: '70%', left: '15%', color: 'rgba(201,168,76,0.09)', dur: '11s' },
+            ].map((o, i) => (
+                <div key={`o${i}`} style={{
+                    position: 'absolute', width: o.w, height: o.h,
+                    top: o.top, left: o.left, right: o.right,
+                    background: `radial-gradient(circle, ${o.color} 0%, transparent 70%)`,
+                    borderRadius: '50%',
+                    animation: `ch1Float ${o.dur} ease-in-out infinite`,
+                    animationDelay: `${i * 2.5}s`,
+                }} />
             ))}
-            <div style={{ position: 'absolute', width: 500, height: 500, top: '-20%', right: '-10%', background: 'radial-gradient(circle, rgba(212,120,138,0.1) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', width: 350, height: 350, bottom: '-10%', left: '-5%', background: 'radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'radial-gradient(circle, rgba(212,120,138,0.1) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-        </>
+
+            {/* Morphing blob */}
+            <div style={{
+                position: 'absolute', width: 155, height: 155,
+                top: '38%', left: '3%',
+                background: 'rgba(212,120,138,0.06)',
+                animation: 'ch1Morph 12s ease-in-out infinite, ch1Float 17s ease-in-out infinite',
+            }} />
+
+            {/* Pulsing rings */}
+            {[
+                { size: 250, top: '12%', right: '7%' },
+                { size: 170, top: '60%', left: '4%' },
+                { size: 105, top: '40%', left: '44%' },
+            ].map((r, i) => (
+                <div key={`r${i}`} style={{
+                    position: 'absolute', width: r.size, height: r.size,
+                    top: r.top, left: r.left, right: r.right,
+                    border: '1px solid rgba(212,120,138,0.15)',
+                    borderRadius: '50%',
+                    animation: `ch1Pulse ${7 + i * 2.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 1.8}s`,
+                }} />
+            ))}
+
+            {/* Diamond accents */}
+            {[
+                { top: '18%', left: '5%', size: 8 },
+                { top: '72%', right: '6%', size: 7 },
+                { top: '48%', left: '47%', size: 5 },
+                { top: '7%', right: '22%', size: 5 },
+                { top: '85%', left: '35%', size: 4 },
+            ].map((d, i) => (
+                <div key={`d${i}`} style={{
+                    position: 'absolute', top: d.top, left: d.left, right: d.right,
+                    width: d.size, height: d.size,
+                    background: i % 2 === 0 ? 'rgba(212,120,138,0.3)' : 'rgba(201,168,76,0.3)',
+                    transform: 'rotate(45deg)',
+                    animation: `ch1Float ${9 + i * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.9}s`,
+                }} />
+            ))}
+        </div>
     );
 }
 
@@ -225,53 +370,142 @@ export default function Chapter1({ index }) {
         },
     };
 
+    const storyTitleStyle = {
+        fontFamily: "'Caveat', cursive",
+        fontSize: 'clamp(2.2rem, 3.8vw, 3.2rem)',
+        color: colors.dark,
+        lineHeight: 1.15,
+    };
+    const storyTextStyle = {
+        fontSize: '1rem',
+        color: '#6b5a5a',
+        lineHeight: 1.85,
+        marginBottom: 16,
+    };
+    const highlightText = { color: colors.rose, fontWeight: 600 };
+
     return (
         <Section index={index} bg="linear-gradient(150deg, #fff8fa 0%, #fef0f5 50%, #fff8f0 100%)">
             <BgDecor />
-            <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+                position: 'relative', zIndex: 1,
+                width: '100%', maxWidth: 1100,
+                boxSizing: 'border-box',
+                display: 'flex', flexDirection: 'column',
+                gap: 'clamp(60px, 8vw, 100px)',
+            }}>
 
+                {/* ── ROW 1: HEADER & INTRO ── */}
                 <FadeIn>
-                    <ChapterLabel num={1} title="💒 Total Pernikahan & Usia Menikah" />
-                    <Divider />
-                    <p style={{ fontSize: '0.95rem', color: '#888', maxWidth: 600, textAlign: 'center', marginBottom: 36, lineHeight: 1.7 }}>
-                        Pada tahun 2024, Australia mencatat lebih dari 240 ribu pernikahan resmi.
-                        Lalu, di usia berapa rata-rata orang Australia memutuskan untuk menikah?
-                    </p>
-                </FadeIn>
-
-                <FadeIn delay={0.1}>
-                    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 36, width: '100%' }}>
-                        <StatBox num="240,338" label="Total Pernikahan 2024" />
-                        <StatBox num="32.8" label="Rata-rata Usia Pria Menikah"    color={colors.gold} />
-                        <StatBox num="31.2" label="Rata-rata Usia Wanita Menikah"  color="#b07cc6" />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'flex-start' }}>
+                        <div style={{ flex: '1 1 340px' }}>
+                            <ChapterLabel num={1} title="💒 Total Pernikahan & Usia Menikah" />
+                            <Divider style={{ margin: '0 0 24px 0' }} />
+                            <h3 style={{ ...storyTitleStyle, textAlign: 'center' }}>Di usia berapa orang Australia memilih untuk menikah?</h3>
+                            <p style={{ ...storyTextStyle, marginTop: 16, textAlign: 'center' }}>
+                                Pada tahun 2024, Australia mencatat lebih dari <span style={highlightText}>240 ribu pernikahan resmi</span>. Di balik angka itu, tersimpan pola yang menarik — sebuah potret kolektif tentang kapan seseorang merasa siap untuk berkomitmen seumur hidup.
+                            </p>
+                            {/* Pull quote */}
+                            <div style={{
+                                borderLeft: `3px solid ${colors.gold}`,
+                                paddingLeft: 16, margin: '20px 0 0',
+                                background: `rgba(201,168,76,0.06)`,
+                                borderRadius: '0 12px 12px 0',
+                                padding: '12px 16px',
+                            }}>
+                                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.95rem', color: colors.dark, fontStyle: 'italic', lineHeight: 1.7, margin: 0 }}>
+                                    "Setiap angka mewakili dua orang yang memutuskan untuk memulai babak baru bersama."
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </FadeIn>
 
-                <div style={{ display: 'flex', gap: 24, flexDirection: 'column', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
-                    <FadeIn delay={0.2}>
-                        <div style={{
-                            background: 'white', borderRadius: 20, padding: 'clamp(16px,3vw,24px)',
-                            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-                            width: '70vw', boxSizwing: 'border-box',
-                        }}>
-                            <PopulationPyramid
-                                ageLabels={ageLabels}
-                                maleCounts={maleCounts}
-                                femaleCounts={femaleCounts}
-                                maxVal={maxVal}
-                            />
-                        </div>
-                    </FadeIn>
+                {/* ── ROW 2: STATS ── */}
+                <FadeIn delay={0.1}>
+                    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+                        <StatBox num="240,338" label="Total Pernikahan 2024" />
+                        <StatBox num="32.8" label="Rata-rata Usia Pria Menikah" color={colors.gold} />
+                        <StatBox num="31.2" label="Rata-rata Usia Wanita Menikah" color="#b07cc6" />
+                    </div>
+                </FadeIn>
 
-                    <FadeIn delay={0.3}>
-                        <ChartCard title="Total Pernikahan berdasarkan Kelompok Umur (2024)" style={{ flex: 1, minWidth: 300 }}>
-                            <Bar data={groupedChartData} options={groupedChartOptions} />
-                            <p style={{ fontSize: '0.75rem', color: '#aaa', textAlign: 'center', marginTop: 10 }}>
-                                Sumber: ABS 2024
+                {/* ── ROW 3: PYRAMID + NARASI ── */}
+                <FadeIn delay={0.15}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(28px, 4.5vw, 52px)', alignItems: 'center' }}>
+                        <div style={{ flex: '1.4 1 320px' }}>
+                            <div style={{
+                                background: 'white', borderRadius: 20, padding: 'clamp(16px,3vw,24px)',
+                                boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+                                border: '1px solid rgba(0,0,0,0.04)',
+                            }}>
+                                <PopulationPyramid
+                                    ageLabels={ageLabels}
+                                    maleCounts={maleCounts}
+                                    femaleCounts={femaleCounts}
+                                    maxVal={maxVal}
+                                />
+                            </div>
+                        </div>
+                        <div style={{ flex: '1 1 280px' }}>
+                            {/* Label tag */}
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${colors.rose}15`, border: `1px solid ${colors.rose}40`, borderRadius: 20, padding: '4px 12px', marginBottom: 12 }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: colors.rose }} />
+                                <span style={{ fontSize: '0.72rem', color: colors.rose, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: 600 }}>Temuan Utama</span>
+                            </div>
+                            <h3 style={storyTitleStyle}>Usia 25–34: Zona Emas Pernikahan</h3>
+                            <p style={{ ...storyTextStyle, marginTop: 12 }}>
+                                Piramida usia ini mengungkap bahwa kelompok usia <span style={highlightText}>25 hingga 34 tahun</span> mendominasi pernikahan di Australia. Ini adalah fase di mana banyak orang telah menyelesaikan pendidikan, membangun karier awal, dan merasa siap secara emosional.
                             </p>
-                        </ChartCard>
-                    </FadeIn>
-                </div>
+                            <p style={storyTextStyle}>
+                                Rata-rata pria menikah di usia <span style={highlightText}>32,8 tahun</span>, sementara wanita di usia <span style={{ color: '#b07cc6', fontWeight: 600 }}>31,2 tahun</span>. Selisih sekitar 1,5 tahun ini konsisten dengan tren yang ditemukan di banyak negara maju lainnya.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Yang menarik, pernikahan di usia <span style={{ color: colors.gold, fontWeight: 600 }}>di bawah 25 tahun</span> kini semakin jarang — mencerminkan pergeseran sosial di mana generasi muda Australia lebih memprioritaskan kemandirian sebelum berkomitmen.
+                            </p>
+                        </div>
+                    </div>
+                </FadeIn>
+
+                {/* ── ROW 4: NARASI + BAR CHART ── */}
+                <FadeIn delay={0.2}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(28px, 4.5vw, 52px)', alignItems: 'center' }}>
+                        <div style={{ flex: '1 1 280px' }}>
+                            {/* Label tag */}
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${colors.gold}15`, border: `1px solid ${colors.gold}40`, borderRadius: 20, padding: '4px 12px', marginBottom: 12 }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: colors.gold }} />
+                                <span style={{ fontSize: '0.72rem', color: colors.gold, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: 600 }}>Distribusi Usia</span>
+                            </div>
+                            <h3 style={storyTitleStyle}>Puncak yang Tak Terduga</h3>
+                            <p style={{ ...storyTextStyle, marginTop: 12 }}>
+                                Bar chart ini mempertegas narasi piramida — kelompok usia <span style={highlightText}>30–34 tahun</span> mencatat jumlah pernikahan tertinggi secara absolut. Ini bukan kebetulan, melainkan cerminan dari generasi yang tumbuh dengan ekspektasi lebih tinggi terhadap kesiapan finansial dan emosional.
+                            </p>
+                            <p style={storyTextStyle}>
+                                Setelah puncak di usia 30-an, angka pernikahan menurun secara bertahap. Namun pernikahan di usia <span style={{ color: colors.gold, fontWeight: 600 }}>40 tahun ke atas</span> tetap signifikan, menunjukkan bahwa cinta tidak mengenal batas usia di Australia.
+                            </p>
+                            {/* Pull quote */}
+                            <div style={{
+                                borderLeft: `3px solid ${colors.rose}`,
+                                background: `rgba(212,120,138,0.05)`,
+                                borderRadius: '0 12px 12px 0',
+                                padding: '12px 16px',
+                                marginTop: 8,
+                            }}>
+                                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.9rem', color: colors.dark, fontStyle: 'italic', lineHeight: 1.7, margin: 0 }}>
+                                    "Usia bukan sekadar angka — ia adalah cermin dari kesiapan yang terbentuk oleh pengalaman hidup."
+                                </p>
+                            </div>
+                        </div>
+                        <div style={{ flex: '1.4 1 320px' }}>
+                            <ChartCard title="Total Pernikahan berdasarkan Kelompok Umur (2024)">
+                                <Bar data={groupedChartData} options={groupedChartOptions} />
+                                <p style={{ fontSize: '0.75rem', color: '#aaa', textAlign: 'center', marginTop: 10 }}>
+                                    Sumber: ABS 2024
+                                </p>
+                            </ChartCard>
+                        </div>
+                    </div>
+                </FadeIn>
 
             </div>
         </Section>
