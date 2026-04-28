@@ -360,12 +360,12 @@ export default function Chapter2({ index }) {
                             </ChartCard>
                         </div>
                         <div style={{ flex: '1 1 280px' }}>
-                            <h3 style={storyTitleStyle}>Mengejar "Sweet Spot"</h3>
+                            <h3 style={storyTitleStyle}>Bulan Populer Pernikahan</h3>
                             <p style={{ ...storyTextStyle, marginTop: 12 }}>
-                                Pernikahan di Australia bukan sekadar memilih angka, melainkan harmoni kolektif yang berdenyut mengikuti napas iklim benua. Pasangan melakukan dialog tak kasatmata dengan alam untuk mengejar <span style={highlightText()}>sweet spots</span> di <span style={highlightText()}>November</span> dan <span style={highlightText()}>Maret</span> disaat bunga bermekaran dan langit musim gugur yang stabil memberikan restu terbaik bagi hari bahagia mereka.
+                                Statistik menunjukkan pola musiman yang dipengaruhi secara signifikan oleh kondisi iklim. Terdapat kecenderungan kuat bagi pasangan untuk memilih periode sweet spot pada bulan <span style={highlightText(colors.dark)}>November</span> dan <span style={highlightText(colors.dark)}>Maret</span>. Pemilihan ini didasari oleh kondisi cuaca yang moderat, di mana transisi musim semi dan musim gugur menyediakan stabilitas suhu dan lingkungan yang ideal untuk perayaan luar ruangan.
                             </p>
                             <p style={storyTextStyle}>
-                                Sebaliknya, angka janji suci merosot ketika alam menunjukkan sisi ekstremnya. Panas menyengat di <span style={highlightText(colors.dark)}>Januari</span> dan dinginnya hujan di puncak musim dingin bulan <span style={highlightText(colors.dark)}>Juli</span> menjadi rintangan alam yang paling dihindari, memaksa langkah pasangan melambat demi menjaga kenyamanan perayaan di ruang terbuka.
+                                Sebaliknya, frekuensi pernikahan mengalami penurunan signifikan saat terjadi ekstremitas cuaca. Angka pernikahan mencapai titik terendah pada bulan <span style={highlightText(colors.dark)}>Januari</span> akibat suhu panas ekstrem, serta pada bulan <span style={highlightText(colors.dark)}>Juli</span> karena tingginya curah hujan dan suhu dingin di puncak musim dingin. Faktor kenyamanan termal bagi penyelenggara dan tamu menjadi pertimbangan utama yang membatasi pilihan tanggal pernikahan pada periode-periode tersebut.
                             </p>
                         </div>
                     </div>
@@ -375,9 +375,9 @@ export default function Chapter2({ index }) {
                 <FadeIn delay={0.2}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(28px, 4.5vw, 52px)', alignItems: 'center' }}>
                         <div style={{ flex: '1 1 280px' }}>
-                            <h3 style={storyTitleStyle}>Sabtu Sang Penguasa</h3>
+                            <h3 style={storyTitleStyle}>Dominasi Hari Sabtu</h3>
                             <p style={{ ...storyTextStyle, marginTop: 12 }}>
-                                Jika iklim menentukan bulannya, maka tradisi sosial adalah penguasa mutlak harinya melalui dominasi hari <span style={highlightText()}>Sabtu</span> yang tak tertandingi. Dengan mencatatkan <span style={highlightText()}>54.538 pernikahan</span>, hari ini berdiri sebagai panggung utama yang menyerap hampir seluruh energi perayaan nasional, bahkan volumenya saja sanggup menandingi akumulasi gabungan pernikahan dari Senin hingga Kamis.
+                                Jika musim menentukan bulan pernikahan, maka pilihan hari tampaknya dipengaruhi oleh kebiasaan sosial—dan Sabtu jelas menjadi favorit utama. Dengan total 54.538 pernikahan, hari ini menjadi pusat sebagian besar perayaan, bahkan jumlahnya hampir menyamai gabungan pernikahan dari Senin hingga Kamis.
                             </p>
                             <p style={storyTextStyle}>
                                 Hal ini jadi bukti bahwa bagi masyarakat Australia, Sabtu bukan sekadar akhir pekan biasa, melainkan kesepakatan kolektif yang tak tergoyahkan untuk merayakan momen cinta yang paling sakral.
