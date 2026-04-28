@@ -416,6 +416,7 @@ export default function Chapter4({ index }) {
                         </div>
                     </div>
                 </FadeIn>
+
             </div>
         </Section>
     );
