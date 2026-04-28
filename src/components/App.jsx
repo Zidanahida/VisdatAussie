@@ -17,7 +17,7 @@ export default function App() {
                     if (e.isIntersecting) setActiveSection(Number(e.target.dataset.index));
                 });
             },
-            { threshold: 0.5 }
+            { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
         );
         sections.forEach(s => observer.observe(s));
         return () => observer.disconnect();
@@ -25,42 +25,61 @@ export default function App() {
 
     const labels = ['Intro', 'Ch.1', 'Ch.2', 'Ch.3', 'Ch.4'];
 
+    const accentColors = [
+        '#d4788a',
+        '#d4788a',
+        '#4a9d5c',
+        'rgb(255, 209, 247)',
+        '#b483ff',
+    ];
+
     const scrollTo = (i) => {
         document.querySelector(`section[data-index="${i}"]`)?.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
         <>
-            {/* Floating nav dots — di luar wrapper agar tidak pengaruhi layout */}
             <nav style={{
-                position: 'fixed', right: 16, top: '50%', transform: 'translateY(-50%)',
-                zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 10,
-                pointerEvents: 'none',
+                position: 'fixed', right: 20, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 1000,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
             }}>
-                {labels.map((lbl, i) => (
-                    <button
-                        key={i}
-                        onClick={() => scrollTo(i)}
-                        title={lbl}
-                        style={{
-                            width: 12, height: 12, borderRadius: '50%', border: 'none', cursor: 'pointer',
-                            background: activeSection === i ? '#d4788a' : '#ddd',
-                            transition: 'all 0.3s',
-                            transform: activeSection === i ? 'scale(1.4)' : 'scale(1)',
-                            pointerEvents: 'auto',
-                        }}
-                    />
-                ))}
+                {labels.map((lbl, i) => {
+                    const isActive = activeSection === i;
+                    return (
+                        <button
+                            key={i}
+                            onClick={() => scrollTo(i)}
+                            title={lbl}
+                            style={{
+                                width: isActive ? 10 : 7,
+                                height: isActive ? 10 : 7,
+                                borderRadius: '50%',
+                                border: `2px solid ${isActive ? accentColors[i] : 'rgba(0,0,0,0.18)'}`,
+                                background: isActive ? accentColors[i] : 'transparent',
+                                cursor: 'pointer',
+                                padding: 0,
+                                transition: 'all 0.3s ease',
+                                display: 'block',
+                            }}
+                        />
+                    );
+                })}
             </nav>
 
-            <div style={{ fontFamily: "'Lato', sans-serif", background: '#fffaf7', color: '#3d2b2b' }}>
-            <Intro index={0} />
-            <Chapter1 index={1} />
-            <Chapter2 index={2} />
-            <Chapter3 index={3} />
-            <Chapter4 index={4} />
-            <Footer />
-        </div>
+            <div style={{
+                fontFamily: "'Lato', sans-serif",
+                background: '#fffaf7',
+                color: '#3d2b2b',
+                overflowX: 'hidden',
+            }}>
+                <Intro index={0} />
+                <Chapter1 index={1} />
+                <Chapter2 index={2} />
+                <Chapter3 index={3} />
+                <Chapter4 index={4} />
+                <Footer />
+            </div>
         </>
     );
 }
